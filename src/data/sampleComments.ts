@@ -67,7 +67,7 @@ export const norfolkComments: CityComment[] = [
     "This project requires a Stormwater Pollution Prevention Permit (STOPPP) Type II incorporated with the building permit. Add note to plans: 'The first STOPPP inspection shall occur prior to starting any construction. Contractor shall contact City of San Mateo Public Works Inspection to schedule STOPPP inspections.'"),
 ];
 
-export const sampleCasesFull: Record<string, { comments: CityComment[]; projectAddress: string; permitNumber: string; jurisdiction: string; submittalNumber: number; projectDescription: string; reviewingDepartment: string; departmentAddress: string; expirationDate: string; planDate: string; applicantName: string; applicantAddress: string; applicantPhone: string; applicantEmail: string; apn: string }> = {
+export const sampleCasesFull: Record<string, { comments: CityComment[]; projectAddress: string; permitNumber: string; jurisdiction: string; submittalNumber: number; projectDescription: string; reviewingDepartment: string; departmentAddress: string; expirationDate: string; planDate: string; applicantName: string; applicantAddress: string; applicantPhone: string; applicantEmail: string; apn: string; reviewerEmail: string; reviewerPhone: string }> = {
   "case-001": {
     comments: norfolkComments,
     projectAddress: "12 N Norfolk St, San Mateo, CA 94403",
