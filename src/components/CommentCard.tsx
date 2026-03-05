@@ -31,7 +31,7 @@ const CommentCard = ({ comment, onUpdate, projectAddress, projectDescription }: 
         let text = "";
         for (const word of mockResponse.split(" ")) {
           text += (text ? " " : "") + word;
-          onUpdate({ ...comment, aiResponse: text, userResponse: text });
+          onUpdate({ ...comment, aiResponse: text, userResponse: text, status: "in_progress" });
           await new Promise(r => setTimeout(r, 30));
         }
         setGenerating(false);
