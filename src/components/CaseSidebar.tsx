@@ -12,8 +12,8 @@ interface CaseSidebarProps {
   onGenerateLetter: () => void;
 }
 
-const ProgressRing = ({ addressed, total }: { addressed: number; total: number }) => {
-  const pct = total > 0 ? (addressed / total) * 100 : 0;
+const ProgressRing = ({ approved, total }: { approved: number; total: number }) => {
+  const pct = total > 0 ? (approved / total) * 100 : 0;
   const r = 45;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
@@ -24,10 +24,10 @@ const ProgressRing = ({ addressed, total }: { addressed: number; total: number }
         <circle cx="60" cy="60" r={r} fill="none" stroke="hsl(var(--gold))" strokeWidth="8"
           strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
           transform="rotate(-90 60 60)" className="transition-all duration-500" />
-        <text x="60" y="55" textAnchor="middle" className="fill-cream font-display text-lg font-bold">{addressed}</text>
+        <text x="60" y="55" textAnchor="middle" className="fill-cream font-display text-lg font-bold">{approved}</text>
         <text x="60" y="70" textAnchor="middle" className="fill-cream/60 font-mono text-[10px]">/ {total}</text>
       </svg>
-      <p className="font-mono text-[10px] uppercase tracking-wider text-cream/60 mt-1">Comments Addressed</p>
+      <p className="font-mono text-[10px] uppercase tracking-wider text-cream/60 mt-1">Review Progress</p>
     </div>
   );
 };
@@ -41,8 +41,13 @@ const CaseSidebar = ({
   projectAddress, permitNumber, jurisdiction, submittalNumber, expirationDate,
   comments, onDisciplineClick, onGenerateLetter,
 }: CaseSidebarProps) => {
-  const addressed = comments.filter(c => c.status === "addressed").length;
+  const approved = comments.filter(c => c.reviewStatus === "approved").length;
+  const edited = comments.filter(c => c.reviewStatus === "edited").length;
+  const pending = comments.filter(c => c.reviewStatus === "pending").length;
+  const removed = comments.filter(c => c.reviewStatus === "removed").length;
+  const manual = comments.filter(c => c.source === "manual").length;
   const total = comments.length;
+  const approvedTotal = approved + edited;
 
   const daysUntilExpiry = expirationDate
     ? Math.ceil((new Date(expirationDate).getTime() - Date.now()) / 86400000)
@@ -50,7 +55,7 @@ const CaseSidebar = ({
 
   const disciplineGroups = ALL_DISCIPLINES.map(d => {
     const items = comments.filter(c => c.discipline === d);
-    const done = items.filter(c => c.status === "addressed").length;
+    const done = items.filter(c => c.reviewStatus === "approved" || c.reviewStatus === "edited").length;
     return { discipline: d, count: items.length, done };
   });
 
@@ -69,15 +74,46 @@ const CaseSidebar = ({
           </span>
         </div>
         {daysUntilExpiry !== null && daysUntilExpiry < 30 && (
-          <p className="font-mono text-[10px] text-danger mt-2">⚠ Expires in {daysUntilExpiry} days</p>
+          <p className="font-mono text-[10px] text-destructive mt-2">⚠ Expires in {daysUntilExpiry} days</p>
         )}
       </div>
 
-      {/* Progress */}
-      <ProgressRing addressed={addressed} total={total} />
+      {/* Progress Ring */}
+      <ProgressRing approved={approvedTotal} total={total} />
+
+      {/* Review Progress Stats */}
+      <div className="px-5 pb-4 border-b border-navy-light">
+        <p className="font-mono text-[9px] uppercase tracking-wider text-cream/40 mb-2">Review Progress</p>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/70">✅ Approved</span>
+            <span className="font-mono text-[10px] text-cream/50">{approved}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/70">✏️ Edited</span>
+            <span className="font-mono text-[10px] text-cream/50">{edited}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/70">⏳ Pending</span>
+            <span className="font-mono text-[10px] text-cream/50">{pending}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/70">🗑 Removed</span>
+            <span className="font-mono text-[10px] text-cream/50">{removed}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/70">👤 Manual</span>
+            <span className="font-mono text-[10px] text-cream/50">{manual}</span>
+          </div>
+          <div className="border-t border-navy-light mt-2 pt-2 flex items-center justify-between">
+            <span className="font-mono text-[10px] text-cream/80 font-medium">Total</span>
+            <span className="font-mono text-[10px] text-cream/80 font-medium">{total}</span>
+          </div>
+        </div>
+      </div>
 
       {/* Discipline Nav */}
-      <div className="flex-1 px-3 pb-4">
+      <div className="flex-1 px-3 py-4">
         <p className="font-mono text-[9px] uppercase tracking-wider text-cream/40 px-2 mb-2">Disciplines</p>
         <div className="space-y-0.5">
           {disciplineGroups.map(({ discipline, count, done }) => (
@@ -106,12 +142,10 @@ const CaseSidebar = ({
       <div className="p-4 border-t border-navy-light space-y-2">
         <button
           onClick={onGenerateLetter}
-          className="w-full py-2.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
+          disabled={approvedTotal === 0}
+          className="w-full py-2.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          📄 Generate Response Letter
-        </button>
-        <button className="w-full py-2 border border-cream/20 text-cream/70 font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-navy-light transition-colors">
-          📋 Preview Case Summary
+          📄 Generate Correction Letter ({approvedTotal} approved)
         </button>
       </div>
     </aside>

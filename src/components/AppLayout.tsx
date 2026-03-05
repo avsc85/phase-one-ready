@@ -1,9 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
-  { to: "/dashboard", label: "Dashboard" },
   { to: "/upload", label: "Upload Plans" },
-  { to: "/new-case", label: "New Case" },
+  { to: "/dashboard", label: "Dashboard" },
 ];
 
 const DemoBanner = () => (
@@ -17,16 +16,12 @@ const Navbar = () => {
 
   return (
     <nav className="h-14 bg-navy flex items-center px-6 border-b-[3px] border-gold">
-      {/* Logo */}
       <Link to="/" className="flex items-center gap-2 mr-8">
         <span className="text-xl">🏛️</span>
-        <span className="font-display font-bold text-lg text-cream">
-          CalPlanCheck
-        </span>
+        <span className="font-display font-bold text-lg text-cream">CalPlanCheck</span>
         <span className="font-display font-bold text-lg text-gold">AI</span>
       </Link>
 
-      {/* Center links */}
       <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
         {navLinks.map((link) => (
           <Link
@@ -43,7 +38,6 @@ const Navbar = () => {
         ))}
       </div>
 
-      {/* Right side */}
       <div className="flex items-center gap-3 ml-auto">
         <span className="font-mono text-[10px] uppercase tracking-wider bg-gold/20 text-gold border border-gold/40 px-2 py-0.5 rounded">
           DEMO
@@ -75,7 +69,7 @@ const AppLayout = ({ children, showFooter = false }: AppLayoutProps) => {
       {showFooter && (
         <footer className="bg-navy py-8 px-6 text-center">
           <p className="font-mono text-[11px] text-cream/60 tracking-wider">
-            CalPlanCheck AI · Powered by GPT-4o · 2022 CBC / CRC / CMC / CPC / CEC · © 2025
+            CalPlanCheck AI · AI-Powered Plan Review · 2022 CBC / CRC / CMC / CPC / CEC · © 2025
           </p>
           <p className="font-body text-[11px] text-cream/40 mt-2 max-w-2xl mx-auto">
             This tool is for demonstration purposes. Always verify code compliance with licensed professionals.

@@ -97,7 +97,7 @@ const NewCase = () => {
       id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: "draft",
+      status: "uploading",
       projectAddress: form.projectAddress,
       apn: form.apn,
       permitNumber: form.permitNumber,

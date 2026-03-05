@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { sampleCases } from "@/data/sampleCases";
 import { CaseSummary, CaseStatus, ProjectType, Jurisdiction } from "@/types";
-import { Plus, Search, MoreHorizontal, FileText, ExternalLink } from "lucide-react";
+import { Plus, Search, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
 const statusConfig: Record<CaseStatus, { label: string; classes: string }> = {
-  draft: { label: "DRAFT", classes: "bg-muted text-muted-foreground" },
-  comments_entered: { label: "COMMENTS ENTERED", classes: "bg-warning-bg text-warning" },
-  responses_in_progress: { label: "IN PROGRESS", classes: "bg-info-bg text-info" },
-  letter_generated: { label: "LETTER READY", classes: "bg-success-bg text-success" },
-  letter_finalized: { label: "FINALIZED", classes: "bg-success-bg text-success" },
-  submitted: { label: "SUBMITTED", classes: "bg-navy text-gold border border-gold/40" },
+  uploading: { label: "UPLOADING", classes: "bg-muted text-muted-foreground" },
+  ai_processing: { label: "AI PROCESSING", classes: "bg-info-bg text-info animate-pulse" },
+  awaiting_review: { label: "AWAITING REVIEW", classes: "bg-warning-bg text-warning" },
+  in_review: { label: "IN REVIEW", classes: "bg-gold/20 text-gold-dark" },
+  letter_ready: { label: "LETTER READY", classes: "bg-success-bg text-success" },
+  sent: { label: "SENT", classes: "bg-navy text-gold border border-gold/40" },
 };
 
 const projectTypeLabels: Record<ProjectType, string> = {
@@ -52,29 +52,27 @@ const StatusBadge = ({ status }: { status: CaseStatus }) => {
 };
 
 const activityFeed = [
-  { text: "Letter generated for 784 Elsie Ave", time: "2 hours ago" },
-  { text: "12 comments entered for 1864 Shenandoah", time: "Yesterday" },
-  { text: "Case created: 43353 Cedarwood Dr", time: "2 days ago" },
-  { text: "Response letter finalized for Norfolk St", time: "3 days ago" },
-  { text: "New case: 2741 Berkshire Dr", time: "5 days ago" },
+  { text: "AI review complete for 12 Norfolk St — 27 corrections found", time: "2 hours ago" },
+  { text: "Correction letter generated for 1864 Shenandoah", time: "Yesterday" },
+  { text: "Plans uploaded: 43353 Cedarwood Dr", time: "2 days ago" },
+  { text: "Letter sent to applicant for Cedarwood Dr", time: "3 days ago" },
+  { text: "New upload: 2741 Berkshire Dr", time: "5 days ago" },
 ];
 
 const Dashboard = () => {
   const [search, setSearch] = useState("");
   const cases = sampleCases;
 
-  const activeCases = cases.filter(c => c.status !== "submitted" && c.status !== "letter_finalized").length;
-  const lettersGenerated = cases.filter(c => ["letter_generated", "letter_finalized", "submitted"].includes(c.status)).length;
-  const avgComments = Math.round(cases.reduce((a, c) => a + c.totalComments, 0) / cases.length);
-  const totalAddressed = cases.reduce((a, c) => a + c.addressedComments, 0);
+  const activeCases = cases.filter(c => c.status !== "sent").length;
+  const letterReady = cases.filter(c => c.status === "letter_ready" || c.status === "sent").length;
+  const awaitingReview = cases.filter(c => c.status === "awaiting_review" || c.status === "in_review").length;
   const totalComments = cases.reduce((a, c) => a + c.totalComments, 0);
-  const completionRate = Math.round((totalAddressed / totalComments) * 100);
 
   const statCards = [
     { label: "Active Cases", value: activeCases, dot: "bg-warning" },
-    { label: "Letters Generated", value: lettersGenerated, dot: "bg-success" },
-    { label: "Avg. Comments/Case", value: avgComments, dot: "bg-info" },
-    { label: "Completion Rate", value: `${completionRate}%`, dot: "bg-gold" },
+    { label: "Letters Ready/Sent", value: letterReady, dot: "bg-success" },
+    { label: "Awaiting Review", value: awaitingReview, dot: "bg-gold" },
+    { label: "Total AI Comments", value: totalComments, dot: "bg-info" },
   ];
 
   const filtered = cases.filter(c =>
@@ -90,13 +88,13 @@ const Dashboard = () => {
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="font-display text-3xl font-bold text-foreground">Plan Check Cases</h1>
-              <p className="font-body text-muted-foreground mt-1">Manage all your active and completed plan check response projects</p>
+              <p className="font-body text-muted-foreground mt-1">Manage all AI-reviewed plan check cases and correction letters</p>
             </div>
             <Link
-              to="/new-case"
+              to="/upload"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-accent-foreground font-mono text-xs uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
             >
-              <Plus className="w-4 h-4" /> New Case
+              <Plus className="w-4 h-4" /> Upload Plans
             </Link>
           </div>
 
@@ -116,13 +114,12 @@ const Dashboard = () => {
           <div className="flex gap-6">
             {/* Main content */}
             <div className="flex-1 min-w-0">
-              {/* Search */}
               <div className="mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search by address, permit number, applicant..."
+                    placeholder="Search by address, permit number..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-md font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold"
@@ -130,18 +127,15 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Table */}
               <div className="bg-card rounded-lg border border-border overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border bg-cream/50">
-                        <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">#</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Project Address</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Permit No.</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Type</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Jurisdiction</th>
-                        <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Sub.</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Comments</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Status</th>
                         <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Actions</th>
@@ -150,16 +144,14 @@ const Dashboard = () => {
                     <tbody>
                       {filtered.map((c, i) => (
                         <tr key={c.id} className={`border-b border-border last:border-0 ${i % 2 === 1 ? "bg-cream/30" : ""} hover:bg-gold/5 transition-colors`}>
-                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{i + 1}</td>
                           <td className="px-4 py-3">
                             <p className="font-body text-sm font-medium text-foreground">{c.projectAddress}</p>
                           </td>
                           <td className="px-4 py-3 font-mono text-xs text-foreground">{c.permitNumber}</td>
                           <td className="px-4 py-3 font-sans text-xs text-muted-foreground">{projectTypeLabels[c.projectType]}</td>
                           <td className="px-4 py-3 font-sans text-xs text-muted-foreground">{jurisdictionLabels[c.jurisdiction]}</td>
-                          <td className="px-4 py-3 font-mono text-xs text-center text-foreground">{c.submittalNumber}</td>
                           <td className="px-4 py-3 font-mono text-xs text-foreground">
-                            {c.addressedComments}/{c.totalComments}
+                            {c.addressedComments} approved / {c.totalComments} total
                           </td>
                           <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                           <td className="px-4 py-3">
@@ -168,21 +160,18 @@ const Dashboard = () => {
                                 to={`/case/${c.id}`}
                                 className="px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider bg-navy text-cream hover:bg-navy-light transition-colors"
                               >
-                                Open
+                                Review
                               </Link>
                               <Link
                                 to={`/case/${c.id}/letter`}
                                 className={`px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                                  ["letter_generated", "letter_finalized", "submitted"].includes(c.status)
+                                  c.status === "letter_ready" || c.status === "sent"
                                     ? "bg-gold/20 text-gold-dark hover:bg-gold/30"
                                     : "bg-muted text-muted-foreground pointer-events-none opacity-50"
                                 }`}
                               >
                                 Letter
                               </Link>
-                              <button className="p-1 rounded hover:bg-muted transition-colors">
-                                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                              </button>
                             </div>
                           </td>
                         </tr>
@@ -193,7 +182,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Activity Feed Sidebar */}
+            {/* Activity Feed */}
             <div className="hidden xl:block w-72 flex-shrink-0">
               <div className="bg-card rounded-lg border border-border p-5">
                 <h3 className="font-display text-sm font-bold text-foreground mb-4">Recent Activity</h3>

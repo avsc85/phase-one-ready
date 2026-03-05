@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
-import { Building2, CheckCircle2, FileText, ArrowRight, Clipboard, Send } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const jurisdictions = [
   { emoji: "🏛️", city: "City of San Mateo", dept: "Building Division", permit: "BD-20XX-XXXXXX" },
@@ -11,23 +11,18 @@ const jurisdictions = [
   { emoji: "🏛️", city: "City of Union City", dept: "Planning Department", permit: "Planning Comments" },
 ];
 
-const disciplines = [
-  "Architectural", "Structural", "Mechanical", "Electrical", "Plumbing",
-  "Energy / Title 24", "Fire & Life Safety", "Green Building / CALGreen",
-  "Planning", "Public Works", "Construction & Demolition", "Geotechnical",
-];
-
 const stats = [
-  { value: "73%", label: "Average Time Saved vs Manual Response" },
-  { value: "12+", label: "Disciplines Covered (Arch, Struct, MEP, Fire...)" },
-  { value: "6", label: "CA Jurisdictions Pre-Configured" },
-  { value: "2022", label: "Code Cycle (CBC / CRC / CMC / CPC / CEC)" },
+  { value: "800+", label: "Code Rules Checked Per Submittal" },
+  { value: "10–14 hrs → 30 min", label: "Review Time Reduction" },
+  { value: "6", label: "Bay Area Jurisdictions Supported" },
+  { value: "5", label: "Specialized AI Agents Working in Parallel" },
 ];
 
 const steps = [
-  { icon: Clipboard, title: "Enter City Comments", emoji: "📋", desc: "Manually enter or paste the corrections from your city's plan check letter. Organized by discipline: Architectural, Structural, MEP, Fire, Planning, and more." },
-  { icon: CheckCircle2, title: "Review & Respond", emoji: "✅", desc: "Review each comment, add your notes, and let AI generate professional, code-accurate responses for every item. Edit anything before finalizing." },
-  { icon: Send, title: "Generate & Submit", emoji: "📄", desc: "Generate a formatted Response Letter with your project header, numbered responses for each comment, and the correct resubmittal language for your jurisdiction." },
+  { emoji: "📤", title: "Upload Plans", desc: "Plan checker uploads the applicant's PDF plan set. Any project type — residential, ADU, commercial TI, addition." },
+  { emoji: "🤖", title: "AI Agents Analyze", desc: "5 specialized AI agents read every sheet, dimension, and note. They check compliance against CBC 2022, CRC, Title 24, CALGreen, CMC, CPC, CEC, and local ordinances." },
+  { emoji: "👁️", title: "Human Review", desc: "The plan checker reviews every AI-generated finding. Approve, edit, or remove each item. Add manual comments if needed. Full control stays with the inspector." },
+  { emoji: "📄", title: "Generate & Send", desc: "One click generates the official correction letter in the exact format required by your jurisdiction — ready to send to the applicant." },
 ];
 
 const MockLetterPreview = () => (
@@ -37,26 +32,26 @@ const MockLetterPreview = () => (
         <span className="text-lg">🏛️</span>
         <span className="font-display text-sm font-bold text-foreground">City of San Mateo</span>
       </div>
-      <p className="font-mono text-[9px] text-muted-foreground">Building Division · 330 West 20th Avenue</p>
+      <p className="font-mono text-[9px] text-muted-foreground">Building Division · Plan Check Corrections</p>
     </div>
     <div className="space-y-2">
+      <p className="font-mono text-[9px] text-muted-foreground">PLAN CHECK CORRECTIONS LIST</p>
       <div className="h-2 bg-muted rounded w-3/4"></div>
       <div className="h-2 bg-muted rounded w-full"></div>
-      <div className="h-2 bg-muted rounded w-5/6"></div>
     </div>
-    <div className="mt-4 p-3 bg-cream rounded border border-border">
-      <p className="font-mono text-[9px] text-muted-foreground mb-1">COMMENT #1 — ARCHITECTURAL</p>
-      <div className="h-2 bg-gold/30 rounded w-full mb-1"></div>
-      <div className="h-2 bg-gold/30 rounded w-4/5"></div>
+    <div className="mt-4 p-3 bg-warning-bg rounded border border-border">
+      <p className="font-mono text-[9px] text-warning mb-1">⚠ CORRECTION #1 — ARCHITECTURAL</p>
+      <div className="h-2 bg-warning/20 rounded w-full mb-1"></div>
+      <div className="h-2 bg-warning/20 rounded w-4/5"></div>
     </div>
-    <div className="mt-2 p-3 bg-success-bg rounded border border-border">
-      <p className="font-mono text-[9px] text-success mb-1">RESPONSE:</p>
-      <div className="h-2 bg-success/20 rounded w-full mb-1"></div>
-      <div className="h-2 bg-success/20 rounded w-3/4"></div>
+    <div className="mt-2 p-3 bg-warning-bg rounded border border-border">
+      <p className="font-mono text-[9px] text-warning mb-1">⚠ CORRECTION #2 — ELECTRICAL</p>
+      <div className="h-2 bg-warning/20 rounded w-full mb-1"></div>
+      <div className="h-2 bg-warning/20 rounded w-3/4"></div>
     </div>
     <div className="mt-3 flex items-center gap-1">
       <div className="h-1.5 w-1.5 rounded-full bg-gold"></div>
-      <p className="font-mono text-[8px] text-muted-foreground">3 more comments...</p>
+      <p className="font-mono text-[8px] text-muted-foreground">7 more corrections...</p>
     </div>
   </div>
 );
@@ -76,17 +71,17 @@ const Index = () => {
                 California Building Departments · Plan Check AI
               </p>
               <h1 className="font-display text-4xl md:text-[52px] md:leading-[1.1] font-bold text-cream mb-6">
-                Turn City Comments Into Professional Response Letters
+                AI Agents Review Building Plans. You Just Approve.
               </h1>
               <p className="font-body text-lg text-cream/70 mb-8 max-w-xl leading-relaxed">
-                Upload your city's Plan Check Correction Letter. Our AI reads every comment, generates code-accurate responses, and produces a formatted letter ready to submit — in minutes, not days.
+                Upload applicant plans. Our AI reads every sheet, checks against 800+ California code rules, and generates all correction comments automatically. You review, approve, and send the official letter — in under an hour.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <Link
-                  to="/new-case"
+                  to="/upload"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-accent-foreground font-mono text-xs uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
                 >
-                  Start New Plan Check <ArrowRight className="w-4 h-4" />
+                  Upload Plans for AI Review <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/case/case-001"
@@ -103,8 +98,8 @@ const Index = () => {
                     to="/case/case-001"
                     className="inline-flex items-center gap-2 px-4 py-2 border border-cream/30 text-cream font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-cream/10 transition-colors"
                   >
-                    📋 View Pre-loaded Case
-                    <span className="text-cream/40 normal-case tracking-normal">12 Norfolk St</span>
+                    📋 Review AI Findings
+                    <span className="text-cream/40 normal-case tracking-normal">12 Norfolk St · 27 comments</span>
                   </Link>
                   <Link
                     to="/upload"
@@ -118,7 +113,7 @@ const Index = () => {
               <div className="flex flex-wrap gap-4 text-cream/60 font-mono text-[11px] mt-4">
                 <span>✓ 2022 CBC / CRC Compliant</span>
                 <span>✓ 6 Bay Area Jurisdictions</span>
-                <span>✓ GPT-4o Powered</span>
+                <span>✓ AI-Powered Plan Review</span>
               </div>
             </div>
             <div className="md:col-span-2 hidden md:flex justify-center">
@@ -134,7 +129,7 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
               <div key={i} className={`text-center ${i > 0 ? "md:border-l md:border-gold-dark/30" : ""}`}>
-                <p className="font-display text-3xl font-bold text-accent-foreground">{stat.value}</p>
+                <p className="font-display text-2xl md:text-3xl font-bold text-accent-foreground">{stat.value}</p>
                 <p className="font-mono text-[10px] uppercase tracking-wider text-accent-foreground/70 mt-1">{stat.label}</p>
               </div>
             ))}
@@ -146,20 +141,20 @@ const Index = () => {
       <section className="bg-card py-20">
         <div className="container">
           <h2 className="font-display text-3xl font-bold text-foreground text-center mb-12">
-            From City Comments to Approved Plans
+            From Uploaded Plans to Official Correction Letter
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-6">
             {steps.map((step, i) => (
               <div key={i} className="text-center relative">
                 <div className="w-16 h-16 rounded-full bg-cream border-2 border-gold flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">{step.emoji}</span>
                 </div>
-                <h3 className="font-display text-xl font-bold text-foreground mb-2">
+                <h3 className="font-display text-lg font-bold text-foreground mb-2">
                   Step {i + 1} — {step.title}
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                {i < 2 && (
-                  <ArrowRight className="hidden md:block absolute top-8 -right-4 w-8 h-8 text-gold" />
+                {i < 3 && (
+                  <ArrowRight className="hidden md:block absolute top-8 -right-3 w-6 h-6 text-gold" />
                 )}
               </div>
             ))}
@@ -198,36 +193,20 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Disciplines */}
-      <section className="bg-card py-16">
-        <div className="container text-center">
-          <h2 className="font-display text-3xl font-bold text-foreground mb-8">
-            Every Review Discipline. Every Comment. Covered.
-          </h2>
-          <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-            {disciplines.map((d) => (
-              <span
-                key={d}
-                className="px-4 py-2 rounded-full bg-cream border border-border font-mono text-xs text-foreground hover:border-gold transition-colors"
-              >
-                {d}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="bg-navy py-16">
         <div className="container text-center">
-          <h2 className="font-display text-3xl font-bold text-cream mb-6">
-            Ready to cut your response time by 73%?
+          <h2 className="font-display text-3xl font-bold text-cream mb-4">
+            Ready to review plans in 30 minutes instead of 14 hours?
           </h2>
+          <p className="font-body text-cream/60 mb-8 max-w-lg mx-auto">
+            Upload your first plan set and let our AI agents do the heavy lifting.
+          </p>
           <Link
-            to="/new-case"
+            to="/upload"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-accent-foreground font-mono text-sm uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
           >
-            Create Your First Plan Check Case
+            Upload Plans for AI Review
           </Link>
         </div>
       </section>

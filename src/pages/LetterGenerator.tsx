@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { loadComments, getCaseInfo, resubmittalRequirements } from "@/lib/caseStorage";
 import { CityComment } from "@/types";
-import { Loader2, Printer, Copy, Save, Edit3, RefreshCw } from "lucide-react";
+import { Loader2, Printer, Copy, Save, Edit3, RefreshCw, Mail } from "lucide-react";
 
 const jurisdictionLabels: Record<string, string> = {
   san_mateo: "San Mateo", san_leandro: "San Leandro", milpitas: "Milpitas",
@@ -17,11 +17,8 @@ const LetterGenerator = () => {
   const [comments, setComments] = useState<CityComment[]>([]);
   const caseInfo = id ? getCaseInfo(id) : null;
   const [letterDate, setLetterDate] = useState(new Date().toISOString().split("T")[0]);
-  const [signatoryName, setSignatoryName] = useState("");
-  const [signatoryTitle, setSignatoryTitle] = useState("Architect");
-  const [licenseNo, setLicenseNo] = useState("");
-  const [sigPhone, setSigPhone] = useState("");
-  const [sigEmail, setSigEmail] = useState("");
+  const [planCheckerName, setPlanCheckerName] = useState("");
+  const [planCheckerTitle, setPlanCheckerTitle] = useState("Building Inspector");
   const [generatedLetter, setGeneratedLetter] = useState("");
   const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -36,39 +33,55 @@ const LetterGenerator = () => {
   const permitNumber = caseInfo?.permitNumber || "";
   const requirements = resubmittalRequirements[jurisdiction] || [];
 
-  const addressedComments = comments.filter(c => c.status === "addressed" || c.status === "in_progress");
-  const disciplines = [...new Set(addressedComments.map(c => c.discipline))];
+  const approvedComments = comments.filter(c => c.reviewStatus === "approved" || c.reviewStatus === "edited");
+  const removedComments = comments.filter(c => c.reviewStatus === "removed");
+  const manualComments = approvedComments.filter(c => c.source === "manual");
+  const disciplines = [...new Set(approvedComments.map(c => c.discipline))];
 
   const handleGenerate = async () => {
     setGenerating(true);
-
-    // Build the letter from addressed comments (mock generation)
     await new Promise(r => setTimeout(r, 1500));
 
     const dateStr = new Date(letterDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
     const grouped: Record<string, CityComment[]> = {};
-    addressedComments.forEach(c => {
+    approvedComments.forEach(c => {
       if (!grouped[c.discipline]) grouped[c.discipline] = [];
       grouped[c.discipline].push(c);
     });
 
-    let letter = `${signatoryName || "[Your Name]"}\n${signatoryTitle}${licenseNo ? ` · License #${licenseNo}` : ""}\n${sigPhone ? `${sigPhone} · ` : ""}${sigEmail || ""}\n\n${dateStr}\n\n`;
-    letter += `${caseInfo?.reviewingDepartment || "Building Department"}\n${caseInfo?.departmentAddress || ""}\n\n`;
-    letter += `RE: Plan Check Response Letter\nProject: ${projectAddress}\nPermit: ${permitNumber}\nSubmittal: ${caseInfo?.submittalNumber || 1}${caseInfo?.submittalNumber === 1 ? "st" : caseInfo?.submittalNumber === 2 ? "nd" : "rd"} Review\n\n`;
-    letter += `Dear Building Official,\n\nPlease find below our responses to the Plan Check comments dated ${caseInfo?.planDate || "as noted"}. All revisions have been incorporated into the resubmitted plan set with revision clouds and delta numbers as indicated.\n\n`;
-    letter += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    let letter = "";
+    letter += `                    PLAN CHECK CORRECTIONS LIST\n\n`;
+    letter += `Applicant Name:    ${caseInfo?.applicantName || "[Applicant Name]"}\n`;
+    letter += `Applicant Address: ${caseInfo?.applicantAddress || "[Applicant Address]"}\n`;
+    letter += `Applicant Phone:   ${caseInfo?.applicantPhone || "[Phone]"}\n`;
+    letter += `Email Address:     ${caseInfo?.applicantEmail || "[Email]"}\n\n`;
+    letter += `Date Plan Check Completed: ${dateStr}\n`;
+    letter += `Plan Check Number:         ${permitNumber}\n`;
+    letter += `APN Number:                ${caseInfo?.apn || "[APN]"}\n`;
+    letter += `Project Address:           ${projectAddress}\n\n`;
+    letter += `Your plans have been reviewed for conformance of the current California\nBuilding Codes, City Ordinances, and City standards. The following\ncorrections or clarifications are required.\n\n`;
+
+    if (requirements.length > 0) {
+      letter += `Guidelines for submittal of revised plans:\n`;
+      requirements.forEach(req => {
+        letter += `• ${req}\n`;
+      });
+      letter += `\n`;
+    }
+
+    letter += `${"━".repeat(55)}\n\n`;
 
     for (const [disc, cmts] of Object.entries(grouped)) {
-      letter += `▸ ${disc.toUpperCase()}\n${"─".repeat(40)}\n\n`;
+      letter += `${disc.toUpperCase()} COMMENTS:\n${"─".repeat(40)}\n\n`;
       for (const c of cmts) {
-        letter += `Comment #${c.number}${c.sheetReference ? ` — ${c.sheetReference}` : ""}${c.codeReference ? ` (${c.codeReference})` : ""}\n`;
-        letter += `City Comment: ${c.commentText}\n\n`;
-        letter += `Response: ${c.userResponse || c.aiResponse || "[RESPONSE NEEDED]"}\n\n`;
+        const text = c.editedText || c.commentText;
+        letter += `Comment ${c.number}. ${c.sheetReference}: ${text}\n\n`;
       }
     }
 
-    letter += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    letter += `We trust the above responses and revised plans address the comments satisfactorily. Should you have any questions or require additional information, please do not hesitate to contact us.\n\nRespectfully submitted,\n\n${signatoryName || "[Your Name]"}\n${signatoryTitle}${licenseNo ? `\nLicense #${licenseNo}` : ""}`;
+    letter += `${"━".repeat(55)}\n\n`;
+    letter += `If you have any questions, please contact ${planCheckerName || "[Plan Checker Name]"} at ${caseInfo?.reviewerEmail || "[email]"}.\n\n`;
+    letter += `${caseInfo?.departmentAddress || "[Department Address]"}  Phone: ${caseInfo?.reviewerPhone || "[phone]"}\n`;
 
     setGeneratedLetter(letter);
     setGenerating(false);
@@ -77,7 +90,7 @@ const LetterGenerator = () => {
   const handlePrint = () => {
     const w = window.open("", "_blank");
     if (!w) return;
-    w.document.write(`<html><head><title>Plan Check Response Letter</title><style>body{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;padding:40px;max-width:8.5in;margin:0 auto;white-space:pre-wrap;}@media print{body{padding:0.5in;}}</style></head><body>${generatedLetter}</body></html>`);
+    w.document.write(`<html><head><title>Plan Check Corrections</title><style>body{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;padding:40px;max-width:8.5in;margin:0 auto;white-space:pre-wrap;}@media print{body{padding:0.5in;}}</style></head><body>${generatedLetter}</body></html>`);
     w.document.close();
     w.print();
   };
@@ -86,15 +99,21 @@ const LetterGenerator = () => {
     navigator.clipboard.writeText(generatedLetter);
   };
 
+  const handleEmail = () => {
+    const email = caseInfo?.applicantEmail || "";
+    const subject = encodeURIComponent(`Plan Check Corrections — ${projectAddress} — ${permitNumber}`);
+    window.open(`mailto:${email}?subject=${subject}`, "_blank");
+  };
+
   return (
     <AppLayout>
       <div className="flex h-[calc(100vh-5.25rem)]">
         {/* Left Config Panel */}
         <aside className="w-[360px] bg-navy flex flex-col overflow-y-auto flex-shrink-0">
           <div className="p-6 border-b border-navy-light">
-            <h2 className="font-display text-lg font-bold text-gold">Letter Configuration</h2>
+            <h2 className="font-display text-lg font-bold text-gold">Generate Correction Letter</h2>
             <p className="font-mono text-[10px] text-cream/40 mt-1">
-              📋 {jurisdictionLabels[jurisdiction]} Format — Standard Correction Response
+              📋 {jurisdictionLabels[jurisdiction]} Format — Official Correction Letter
             </p>
           </div>
 
@@ -104,33 +123,51 @@ const LetterGenerator = () => {
               <input type="date" value={letterDate} onChange={e => setLetterDate(e.target.value)} className={inputClasses} />
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Your Name / Signatory</label>
-              <input value={signatoryName} onChange={e => setSignatoryName(e.target.value)} className={inputClasses} placeholder="John Smith" />
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Plan Checker Name <span className="text-destructive">*</span></label>
+              <input value={planCheckerName} onChange={e => setPlanCheckerName(e.target.value)} className={inputClasses} placeholder="Jane Doe" />
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Title</label>
-              <select value={signatoryTitle} onChange={e => setSignatoryTitle(e.target.value)} className={inputClasses}>
-                <option>Architect</option>
-                <option>Engineer</option>
-                <option>Owner</option>
-                <option>Contractor</option>
-                <option>Designer</option>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Plan Checker Title</label>
+              <select value={planCheckerTitle} onChange={e => setPlanCheckerTitle(e.target.value)} className={inputClasses}>
+                <option>Building Inspector</option>
+                <option>Plan Check Engineer</option>
+                <option>Senior Building Inspector</option>
+                <option>Plans Examiner</option>
               </select>
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">License # (optional)</label>
-              <input value={licenseNo} onChange={e => setLicenseNo(e.target.value)} className={inputClasses} placeholder="C-XXXXX" />
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Department</label>
+              <input value={caseInfo?.reviewingDepartment || ""} readOnly className={`${inputClasses} opacity-60`} />
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Phone</label>
-              <input value={sigPhone} onChange={e => setSigPhone(e.target.value)} className={inputClasses} placeholder="(415) 555-0100" />
-            </div>
-            <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Email</label>
-              <input value={sigEmail} onChange={e => setSigEmail(e.target.value)} className={inputClasses} placeholder="you@firm.com" />
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-1.5">Department Address</label>
+              <input value={caseInfo?.departmentAddress || ""} readOnly className={`${inputClasses} opacity-60`} />
             </div>
 
+            {/* Letter Count Summary */}
             <div className="pt-4 border-t border-navy-light">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-2">Letter Summary</p>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-cream/70">✅ Approved comments</span>
+                  <span className="font-mono text-[10px] text-cream/50">{approvedComments.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-cream/70">🗑 Removed (excluded)</span>
+                  <span className="font-mono text-[10px] text-cream/50">{removedComments.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-cream/70">👤 Manual comments</span>
+                  <span className="font-mono text-[10px] text-cream/50">{manualComments.length}</span>
+                </div>
+                <div className="border-t border-navy-light mt-2 pt-2 flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-cream/80 font-medium">Total in letter</span>
+                  <span className="font-mono text-[10px] text-gold font-bold">{approvedComments.length} corrections</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
               <p className="font-mono text-[10px] uppercase tracking-wider text-cream/50 mb-2">Disciplines Included</p>
               <div className="space-y-1">
                 {disciplines.map(d => (
@@ -140,20 +177,16 @@ const LetterGenerator = () => {
                   </div>
                 ))}
                 {disciplines.length === 0 && (
-                  <p className="font-mono text-[10px] text-cream/30 italic">No addressed comments yet</p>
+                  <p className="font-mono text-[10px] text-cream/30 italic">No approved comments yet</p>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="p-6 border-t border-navy-light space-y-3">
-            <div className="flex justify-between font-mono text-[10px] text-cream/50">
-              <span>{addressedComments.length} comments included</span>
-              <span>{disciplines.length} disciplines</span>
-            </div>
+          <div className="p-6 border-t border-navy-light">
             <button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || approvedComments.length === 0}
               className="w-full py-3 bg-gold text-accent-foreground font-mono text-xs uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors disabled:opacity-50"
             >
               {generating ? (
@@ -161,7 +194,7 @@ const LetterGenerator = () => {
               ) : generatedLetter ? (
                 <span className="flex items-center justify-center gap-2"><RefreshCw className="w-4 h-4" /> Regenerate Letter</span>
               ) : (
-                "📄 Generate Response Letter"
+                "📄 Generate Official Correction Letter"
               )}
             </button>
           </div>
@@ -172,16 +205,19 @@ const LetterGenerator = () => {
           {generatedLetter && (
             <div className="sticky top-0 z-10 bg-card border-b border-border px-6 py-2 flex items-center gap-2">
               <button onClick={() => setEditing(!editing)} className="flex items-center gap-1.5 px-3 py-1.5 bg-navy text-cream font-mono text-[10px] uppercase tracking-wider rounded hover:bg-navy-light transition-colors">
-                <Edit3 className="w-3 h-3" /> {editing ? "Done Editing" : "Edit"}
+                <Edit3 className="w-3 h-3" /> {editing ? "Done Editing" : "✏️ Edit Mode"}
               </button>
               <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-navy text-cream font-mono text-[10px] uppercase tracking-wider rounded hover:bg-navy-light transition-colors">
-                <Printer className="w-3 h-3" /> Print
+                <Printer className="w-3 h-3" /> 🖨 Print
+              </button>
+              <button onClick={handleEmail} className="flex items-center gap-1.5 px-3 py-1.5 bg-navy text-cream font-mono text-[10px] uppercase tracking-wider rounded hover:bg-navy-light transition-colors">
+                <Mail className="w-3 h-3" /> 📧 Email to Applicant
               </button>
               <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 bg-navy text-cream font-mono text-[10px] uppercase tracking-wider rounded hover:bg-navy-light transition-colors">
                 <Copy className="w-3 h-3" /> Copy All
               </button>
               <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-wider rounded hover:bg-gold-dark transition-colors">
-                <Save className="w-3 h-3" /> Save
+                <Save className="w-3 h-3" /> 💾 Save Draft
               </button>
             </div>
           )}
@@ -200,44 +236,21 @@ const LetterGenerator = () => {
             ) : (
               <div className="bg-card border border-border shadow-lg p-12 min-h-[11in] flex flex-col">
                 <div className="text-muted-foreground/40 space-y-4 flex-1">
-                  <p className="font-mono text-sm">[Your Name]</p>
-                  <p className="font-mono text-sm">[Your Address]</p>
-                  <p className="font-mono text-sm">[Date]</p>
+                  <p className="font-mono text-lg text-center font-bold">PLAN CHECK CORRECTIONS LIST</p>
                   <br />
-                  <p className="font-mono text-sm">City of {jurisdictionLabels[jurisdiction]}</p>
-                  <p className="font-mono text-sm">Building Division</p>
-                  <p className="font-mono text-sm">{caseInfo?.departmentAddress || "[Address]"}</p>
-                  <br />
-                  <p className="font-mono text-sm">RE: Plan Check Response Letter</p>
-                  <p className="font-mono text-sm">Project: {projectAddress}</p>
+                  <p className="font-mono text-sm">Applicant Name: {caseInfo?.applicantName || "[Applicant Name]"}</p>
+                  <p className="font-mono text-sm">Project Address: {projectAddress}</p>
                   <p className="font-mono text-sm">Permit: {permitNumber}</p>
                   <br />
-                  <p className="font-mono text-sm">Dear Building Official,</p>
+                  <p className="font-mono text-sm italic">Your plans have been reviewed for conformance of the current California Building Codes...</p>
                   <br />
-                  <p className="font-mono text-sm italic">[AI will generate your complete response letter here...]</p>
+                  <p className="font-mono text-sm italic">[Correction comments will appear here after generation...]</p>
                   <br />
                   <div className="border-t border-border/30 pt-4 mt-auto">
                     <p className="font-mono text-xs text-center text-muted-foreground/40">
-                      ← Click "Generate Response Letter" to create your letter
+                      ← Click "Generate Official Correction Letter" to create the letter
                     </p>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* Resubmittal Checklist */}
-            {generatedLetter && requirements.length > 0 && (
-              <div className="mt-6 bg-muted/50 border border-border rounded-lg p-6">
-                <h3 className="font-display text-sm font-bold text-foreground mb-3">
-                  📋 Resubmittal Checklist — {jurisdictionLabels[jurisdiction]}
-                </h3>
-                <div className="space-y-2">
-                  {requirements.map((req, i) => (
-                    <label key={i} className="flex items-start gap-2 cursor-pointer">
-                      <input type="checkbox" className="mt-0.5 w-4 h-4 rounded border-border text-gold focus:ring-gold" />
-                      <span className="font-body text-sm text-foreground">{req}</span>
-                    </label>
-                  ))}
                 </div>
               </div>
             )}

@@ -9,7 +9,13 @@ export interface CityComment {
   userResponse: string;
   aiResponse: string;
   priority: "required" | "advisory";
+  source: "ai" | "manual";
+  reviewStatus: ReviewStatus;
+  editedText: string;
+  aiConfidence: "high" | "medium" | "low";
 }
+
+export type ReviewStatus = "pending" | "approved" | "edited" | "removed";
 
 export type Discipline =
   | "General"
@@ -62,12 +68,12 @@ export interface PlanCheckCase {
 }
 
 export type CaseStatus =
-  | "draft"
-  | "comments_entered"
-  | "responses_in_progress"
-  | "letter_generated"
-  | "letter_finalized"
-  | "submitted";
+  | "uploading"
+  | "ai_processing"
+  | "awaiting_review"
+  | "in_review"
+  | "letter_ready"
+  | "sent";
 
 export type ProjectType =
   | "residential_remodel"
