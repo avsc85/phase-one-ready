@@ -11,6 +11,7 @@ interface CommentCardProps {
 
 const statusStyles: Record<CommentStatus, { bg: string; border: string; badge: string; label: string }> = {
   pending: { bg: "bg-card", border: "border-l-muted-foreground/40", badge: "bg-muted text-muted-foreground", label: "PENDING" },
+  in_progress: { bg: "bg-info-bg", border: "border-l-info", badge: "bg-info/20 text-info", label: "IN PROGRESS" },
   addressed: { bg: "bg-success-bg", border: "border-l-success", badge: "bg-success/20 text-success", label: "ADDRESSED" },
   deferred: { bg: "bg-warning-bg", border: "border-l-warning", badge: "bg-warning/20 text-warning", label: "DEFERRED" },
   "n/a": { bg: "bg-muted/50", border: "border-l-muted-foreground/30", badge: "bg-muted text-muted-foreground", label: "N/A" },
@@ -83,7 +84,7 @@ const CommentCard = ({ comment, onUpdate, projectAddress, projectDescription }: 
           </button>
           {showStatusMenu && (
             <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg z-10 min-w-[140px]">
-              {(["pending", "addressed", "deferred", "n/a"] as CommentStatus[]).map(s => (
+              {(["pending", "in_progress", "addressed", "deferred", "n/a"] as CommentStatus[]).map(s => (
                 <button key={s} onClick={() => setStatus(s)}
                   className={`w-full text-left px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider hover:bg-muted transition-colors ${comment.status === s ? "text-gold font-bold" : "text-foreground"}`}>
                   {comment.status === s ? "● " : "○ "}{statusStyles[s].label}
