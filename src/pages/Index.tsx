@@ -95,7 +95,27 @@ const Index = () => {
                   View Demo Case
                 </Link>
               </div>
-              <div className="flex flex-wrap gap-4 text-cream/60 font-mono text-[11px]">
+              {/* Quick Demo Row */}
+              <div className="mt-6 pt-4 border-t border-cream/20">
+                <p className="font-mono text-[10px] text-cream/40 uppercase tracking-wider mb-3">── Quick Demo ──</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    to="/case/case-001"
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-cream/30 text-cream font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-cream/10 transition-colors"
+                  >
+                    📋 View Pre-loaded Case
+                    <span className="text-cream/40 normal-case tracking-normal">12 Norfolk St</span>
+                  </Link>
+                  <Link
+                    to="/upload"
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-cream/30 text-cream font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-cream/10 transition-colors"
+                  >
+                    🎬 Watch AI Processing
+                    <span className="text-cream/40 normal-case tracking-normal">Upload → AI → Letter</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4 text-cream/60 font-mono text-[11px] mt-4">
                 <span>✓ 2022 CBC / CRC Compliant</span>
                 <span>✓ 6 Bay Area Jurisdictions</span>
                 <span>✓ GPT-4o Powered</span>

@@ -180,6 +180,28 @@ const CaseDetail = () => {
             )}
           </div>
         </div>
+
+        {/* Summary Bar */}
+        <div className="sticky bottom-0 bg-card border-t border-border px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] text-foreground">{projectAddress}</span>
+            <span className="font-mono text-[10px] text-gold">·</span>
+            <span className="font-mono text-[10px] text-foreground">{permitNumber}</span>
+            <span className="font-mono text-[10px] text-gold">·</span>
+            <span className="font-mono text-[10px] text-muted-foreground">{jurisdictionLabels[jurisdiction] || jurisdiction}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[10px] text-success">✓ {addressedCount} addressed</span>
+            <span className="font-mono text-[10px] text-info">● {pendingCount} pending</span>
+            {naCount > 0 && <span className="font-mono text-[10px] text-muted-foreground">— {naCount} N/A</span>}
+            <button
+              onClick={() => navigate(`/case/${id}/letter`)}
+              className="ml-2 px-4 py-1.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-wider rounded hover:bg-gold-dark transition-colors"
+            >
+              → Generate Letter ({addressedCount} addressed)
+            </button>
+          </div>
+        </div>
       </div>
 
       <AddCommentModal
