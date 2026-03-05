@@ -72,7 +72,23 @@ const UploadPage = () => {
 
   const handleStart = () => {
     if (!address.trim()) return;
-    navigate("/processing/demo-001");
+
+    // Create a new case and store its metadata for the processing page
+    const caseId = `case-${Date.now()}`;
+    const uploadData = {
+      caseId,
+      address: address.trim(),
+      apn,
+      jurisdiction,
+      projectType,
+      permitNumber: permitNumber || `BD-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`,
+      applicantName,
+      applicantEmail,
+      fileName: file?.name || "plans.pdf",
+      fileSize: file?.size || 0,
+    };
+    sessionStorage.setItem("calplancheck_upload", JSON.stringify(uploadData));
+    navigate(`/processing/${caseId}`);
   };
 
   const checklist = checklistData[projectType] || checklistData.default;
@@ -146,7 +162,7 @@ const UploadPage = () => {
                   </div>
                   <div>
                     <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
-                      Permit / Application Number <span className="text-destructive">*</span>
+                      Permit / Application Number
                     </label>
                     <input value={permitNumber} onChange={e => setPermitNumber(e.target.value)} className={inputClasses} placeholder="BD-2025-XXXXXX" />
                   </div>

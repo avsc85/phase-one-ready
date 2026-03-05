@@ -19,6 +19,10 @@ export function saveComments(caseId: string, comments: CityComment[]) {
 }
 
 export function getCaseInfo(caseId: string) {
+  // Check localStorage first for dynamically created cases
+  const stored = localStorage.getItem(`calplancheck_caseinfo_${caseId}`);
+  if (stored) return JSON.parse(stored);
+  // Fall back to sample data
   return sampleCasesFull[caseId] || null;
 }
 

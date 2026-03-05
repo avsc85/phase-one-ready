@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { ArrowRight } from "lucide-react";
@@ -56,9 +57,9 @@ const MockLetterPreview = () => (
   </div>
 );
 
-const Index = () => {
+const Index = forwardRef<HTMLDivElement>((_, ref) => {
   return (
-    <AppLayout showFooter>
+    <AppLayout showFooter ref={ref}>
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-navy-dark to-navy-light overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{
@@ -212,6 +213,8 @@ const Index = () => {
       </section>
     </AppLayout>
   );
-};
+});
+
+Index.displayName = "Index";
 
 export default Index;

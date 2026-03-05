@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
@@ -60,9 +61,9 @@ interface AppLayoutProps {
   showFooter?: boolean;
 }
 
-const AppLayout = ({ children, showFooter = false }: AppLayoutProps) => {
+const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(({ children, showFooter = false }, ref) => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div ref={ref} className="min-h-screen flex flex-col bg-background">
       <DemoBanner />
       <Navbar />
       <main className="flex-1">{children}</main>
@@ -78,6 +79,8 @@ const AppLayout = ({ children, showFooter = false }: AppLayoutProps) => {
       )}
     </div>
   );
-};
+});
+
+AppLayout.displayName = "AppLayout";
 
 export default AppLayout;
