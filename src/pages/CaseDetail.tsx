@@ -8,6 +8,11 @@ import { loadComments, saveComments, getCaseInfo, ALL_DISCIPLINES, disciplineIco
 import { CityComment, Discipline } from "@/types";
 import { Plus, Zap, Loader2, CheckSquare } from "lucide-react";
 
+const jurisdictionLabels: Record<string, string> = {
+  san_mateo: "San Mateo", san_leandro: "San Leandro", milpitas: "Milpitas",
+  san_bruno: "San Bruno", union_city: "Union City", fremont: "Fremont", other: "Other",
+};
+
 const CaseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
