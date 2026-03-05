@@ -84,7 +84,7 @@ export const norfolkComments: CityComment[] = [
     status: "pending", userResponse: "", aiResponse: "", priority: "required" },
 ];
 
-export const sampleCasesFull: Record<string, { comments: CityComment[]; projectAddress: string; permitNumber: string; jurisdiction: string; submittalNumber: number; projectDescription: string; reviewingDepartment: string; departmentAddress: string; expirationDate: string }> = {
+export const sampleCasesFull: Record<string, { comments: CityComment[]; projectAddress: string; permitNumber: string; jurisdiction: string; submittalNumber: number; projectDescription: string; reviewingDepartment: string; departmentAddress: string; expirationDate: string; planDate: string }> = {
   "case-001": {
     comments: norfolkComments,
     projectAddress: "12 N Norfolk St, San Mateo, CA 94403",
@@ -95,5 +95,6 @@ export const sampleCasesFull: Record<string, { comments: CityComment[]; projectA
     reviewingDepartment: "City of San Mateo Building Division",
     departmentAddress: "330 West 20th Avenue, San Mateo, CA 94403-1388",
     expirationDate: "2025-10-23",
+    planDate: "2025-04-23",
   },
 };
