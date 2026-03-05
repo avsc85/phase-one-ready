@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { norfolkComments, sampleCasesFull } from "@/data/sampleComments";
 
 interface Agent {
   icon: string;
@@ -35,23 +36,68 @@ const logLines = [
   { text: "[⚠] CGC 4.304.1 — MWELO form missing", type: "warn" },
   { text: "    Required for landscaping work", type: "warn-sub" },
   { text: "[●] Generating correction comments...", type: "info" },
-  { text: "[●] Applying San Mateo letter format...", type: "info" },
-  { text: "[✅] Analysis complete — 9 items flagged", type: "done" },
+  { text: "[●] Applying jurisdiction letter format...", type: "info" },
+  { text: "[✅] Analysis complete — corrections flagged", type: "done" },
 ];
 
 const Processing = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Load upload data from session storage or fall back to demo
+  const uploadDataRaw = sessionStorage.getItem("calplancheck_upload");
+  const uploadData = uploadDataRaw ? JSON.parse(uploadDataRaw) : null;
+  const isDemo = !uploadData || id === "case-001" || id === "demo-001";
+
+  const projectAddress = isDemo ? "12 N Norfolk St, San Mateo, CA 94403" : uploadData?.address || "Unknown Address";
+  const fileName = isDemo ? "plans_norfolk_st.pdf · 18 pages" : `${uploadData?.fileName || "plans.pdf"} · analyzing...`;
+  const targetCaseId = isDemo ? "case-001" : uploadData?.caseId || id || "case-001";
+
   const [agents, setAgents] = useState<Agent[]>([
     { icon: "📄", name: "Plan Reader", description: "Reading PDF pages and extracting all drawing content", status: "waiting", progress: 0, result: "", duration: 2000 },
-    { icon: "📋", name: "Rule Engine", description: "Loading jurisdiction rules for City of San Mateo · Residential Remodel", status: "waiting", progress: 0, result: "", duration: 1500 },
+    { icon: "📋", name: "Rule Engine", description: `Loading jurisdiction rules · ${isDemo ? "Residential Remodel" : uploadData?.projectType?.replace(/_/g, " ") || "Project"}`, status: "waiting", progress: 0, result: "", duration: 1500 },
     { icon: "🔍", name: "Compliance Checker", description: "Comparing plan elements against all loaded rules", status: "waiting", progress: 0, result: "", duration: 4000 },
     { icon: "✍️", name: "Comment Writer", description: "Writing professional correction comments for each violation", status: "waiting", progress: 0, result: "", duration: 3000 },
-    { icon: "📄", name: "Letter Formatter", description: "Formatting output for City of San Mateo correction letter format", status: "waiting", progress: 0, result: "", duration: 1500 },
+    { icon: "📄", name: "Letter Formatter", description: `Formatting output for correction letter format`, status: "waiting", progress: 0, result: "", duration: 1500 },
   ]);
   const [visibleLogs, setVisibleLogs] = useState<number>(0);
   const [showSummary, setShowSummary] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
   const startedRef = useRef(false);
+
+  // For non-demo cases, seed sample comments to localStorage so CaseDetail can load them
+  useEffect(() => {
+    if (!isDemo && uploadData) {
+      const caseKey = `calplancheck_comments_${targetCaseId}`;
+      if (!localStorage.getItem(caseKey)) {
+        // Seed the demo comments for the new case so there's data to review
+        localStorage.setItem(caseKey, JSON.stringify(norfolkComments));
+      }
+      // Also seed case info
+      const infoKey = `calplancheck_caseinfo_${targetCaseId}`;
+      if (!localStorage.getItem(infoKey)) {
+        const caseInfo = {
+          projectAddress: uploadData.address,
+          permitNumber: uploadData.permitNumber,
+          jurisdiction: uploadData.jurisdiction,
+          submittalNumber: 1,
+          projectDescription: "",
+          reviewingDepartment: "",
+          departmentAddress: "",
+          expirationDate: "",
+          planDate: new Date().toISOString().split("T")[0],
+          applicantName: uploadData.applicantName || "",
+          applicantAddress: "",
+          applicantPhone: "",
+          applicantEmail: uploadData.applicantEmail || "",
+          apn: uploadData.apn || "",
+          reviewerEmail: "",
+          reviewerPhone: "",
+        };
+        localStorage.setItem(infoKey, JSON.stringify(caseInfo));
+      }
+    }
+  }, [isDemo, uploadData, targetCaseId]);
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -69,7 +115,8 @@ const Processing = () => {
       for (let i = 0; i < 5; i++) {
         setAgents(prev => prev.map((a, j) => j === i ? { ...a, status: "running" } : a));
         
-        const duration = agents[i].duration;
+        const durations = [2000, 1500, 4000, 3000, 1500];
+        const duration = durations[i];
         const steps = 20;
         for (let s = 1; s <= steps; s++) {
           await new Promise(r => setTimeout(r, duration / steps));
@@ -105,6 +152,12 @@ const Processing = () => {
     return d.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
   };
 
+  const handleReview = () => {
+    // Clean up session storage
+    sessionStorage.removeItem("calplancheck_upload");
+    navigate(`/case/${targetCaseId}`);
+  };
+
   return (
     <div className="min-h-screen bg-navy-dark text-cream">
       {/* Header */}
@@ -115,8 +168,8 @@ const Processing = () => {
             <span className="font-display font-bold text-lg text-cream">CalPlanCheck</span>
             <span className="font-display font-bold text-lg text-gold">AI</span>
           </div>
-          <p className="font-display text-base font-bold text-cream">12 N Norfolk St, San Mateo, CA 94403</p>
-          <p className="font-mono text-[11px] text-cream/50">plans_norfolk_st.pdf · 18 pages</p>
+          <p className="font-display text-base font-bold text-cream">{projectAddress}</p>
+          <p className="font-mono text-[11px] text-cream/50">{fileName}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />
@@ -208,7 +261,7 @@ const Processing = () => {
                   <p className="font-mono text-[10px] text-cream/50">Time saved vs manual review: <span className="text-gold font-bold">~11 hours</span></p>
                 </div>
                 <button
-                  onClick={() => navigate("/case/case-001")}
+                  onClick={handleReview}
                   className="w-full py-3 bg-gold text-accent-foreground font-mono text-xs uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
                 >
                   → Review AI-Generated Comments
