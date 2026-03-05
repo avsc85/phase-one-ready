@@ -6,7 +6,7 @@ import { DisciplineSection } from "@/components/CommentCard";
 import AddCommentModal from "@/components/AddCommentModal";
 import { loadComments, saveComments, getCaseInfo, ALL_DISCIPLINES, disciplineIcons, resubmittalRequirements } from "@/lib/caseStorage";
 import { CityComment, Discipline } from "@/types";
-import { Plus, Zap, Loader2, CheckSquare } from "lucide-react";
+import { Check } from "lucide-react";
 
 const jurisdictionLabels: Record<string, string> = {
   san_mateo: "San Mateo", san_leandro: "San Leandro", milpitas: "Milpitas",
@@ -18,9 +18,7 @@ const CaseDetail = () => {
   const navigate = useNavigate();
   const [comments, setComments] = useState<CityComment[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [bulkGenerating, setBulkGenerating] = useState(false);
-  const [bulkProgress, setBulkProgress] = useState(0);
-  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+  const [addForDiscipline, setAddForDiscipline] = useState<Discipline | undefined>();
 
   const caseInfo = id ? getCaseInfo(id) : null;
 
@@ -49,31 +47,26 @@ const CaseDetail = () => {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const emptyResponseCount = comments.filter(c => !c.userResponse && c.status !== "n/a").length;
-  const addressedCount = comments.filter(c => c.status === "addressed").length;
-  const pendingCount = comments.filter(c => c.status === "pending").length;
-  const naCount = comments.filter(c => c.status === "n/a").length;
-  const deferredCount = comments.filter(c => c.status === "deferred").length;
+  const handleAddManual = (discipline: Discipline) => {
+    setAddForDiscipline(discipline);
+    setShowAddModal(true);
+  };
 
-  const handleBulkGenerate = async () => {
-    setBulkGenerating(true);
-    const empty = comments.filter(c => !c.userResponse && c.status !== "n/a");
-    for (let i = 0; i < empty.length; i++) {
-      setBulkProgress(i + 1);
-      const c = empty[i];
-      const mockResponse = `Acknowledged. Plans have been revised on ${c.sheetReference} to address this comment. ${c.codeReference ? `Revisions comply with ${c.codeReference} as noted.` : "All revisions are reflected in the updated drawings."} Please refer to the revised plans for the specific changes made.`;
-      updateComment({ ...c, aiResponse: mockResponse, userResponse: mockResponse });
-      await new Promise(r => setTimeout(r, 200));
-    }
-    setBulkGenerating(false);
-    setBulkProgress(0);
+  const approvedCount = comments.filter(c => c.reviewStatus === "approved" || c.reviewStatus === "edited").length;
+  const pendingCount = comments.filter(c => c.reviewStatus === "pending").length;
+  const removedCount = comments.filter(c => c.reviewStatus === "removed").length;
+
+  const handleApproveAll = () => {
+    const updated = comments.map(c =>
+      c.reviewStatus === "pending" ? { ...c, reviewStatus: "approved" as const, status: "addressed" as const } : c
+    );
+    setComments(updated);
+    if (id) saveComments(id, updated);
   };
 
   const jurisdiction = caseInfo?.jurisdiction || "san_mateo";
-  const requirements = resubmittalRequirements[jurisdiction] || [];
   const projectAddress = caseInfo?.projectAddress || "Unknown Address";
   const permitNumber = caseInfo?.permitNumber || "";
-  const projectDescription = caseInfo?.projectDescription || "";
 
   const nextNumber = String(comments.length + 1);
 
@@ -97,51 +90,48 @@ const CaseDetail = () => {
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="font-display text-xl font-bold text-foreground">
-                  {projectAddress} · <span className="text-gold">{permitNumber}</span>
+                  AI-Generated Plan Check Comments — Human Review
                 </h1>
-                <div className="flex gap-3 mt-1">
-                  <span className="font-mono text-[10px] text-success">✓ {addressedCount} Addressed</span>
-                  <span className="font-mono text-[10px] text-info">● {pendingCount} Pending</span>
-                  {deferredCount > 0 && <span className="font-mono text-[10px] text-warning">◐ {deferredCount} Deferred</span>}
-                  <span className="font-mono text-[10px] text-muted-foreground">— {naCount} N/A</span>
-                </div>
+                <p className="font-body text-sm text-muted-foreground mt-1">
+                  Review each finding below. Approve, edit, or remove. Add manual comments if needed.
+                </p>
               </div>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-[2px] rounded-md hover:bg-gold-dark transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Comment
-              </button>
             </div>
           </div>
 
           <div className="px-6 py-6 max-w-4xl">
-            {/* Bulk generate banner */}
-            {emptyResponseCount > 0 && (
-              <div className="mb-6 flex items-center justify-between px-4 py-3 bg-warning-bg border border-warning/20 rounded-lg">
-                <span className="font-mono text-xs text-warning">
-                  <Zap className="w-3.5 h-3.5 inline mr-1" />
-                  {emptyResponseCount} comments have no response yet.
-                </span>
-                <button
-                  onClick={handleBulkGenerate}
-                  disabled={bulkGenerating}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-navy text-cream font-mono text-[10px] uppercase tracking-wider rounded hover:bg-navy-light transition-colors disabled:opacity-50"
-                >
-                  {bulkGenerating ? (
-                    <><Loader2 className="w-3 h-3 animate-spin" /> {bulkProgress}/{emptyResponseCount}</>
-                  ) : (
-                    "Generate All AI Responses"
-                  )}
-                </button>
+            {/* AI Status Banner */}
+            <div className="mb-6 flex items-center justify-between px-4 py-3 bg-info-bg border border-info/20 rounded-lg">
+              <span className="font-mono text-xs text-info">
+                🤖 AI generated {comments.filter(c => c.source === "ai").length} correction comments for review.
+                Approve all findings or review item by item.
+              </span>
+              <div className="flex gap-2">
+                {pendingCount > 0 && (
+                  <button
+                    onClick={handleApproveAll}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-success/10 text-success font-mono text-[10px] uppercase tracking-wider rounded hover:bg-success/20 transition-colors"
+                  >
+                    <Check className="w-3 h-3" /> Approve All ({pendingCount})
+                  </button>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Jurisdiction intro */}
-            <div className="mb-6 px-4 py-3 bg-info-bg border border-info/10 rounded-lg">
-              <p className="font-body text-sm text-info italic">
-                {caseInfo?.reviewingDepartment || "Building Department"} comments. Your plans have been reviewed for conformance of the current California Building Codes, City Ordinances, and City standards.
-              </p>
+            {/* Summary Stats */}
+            <div className="mb-6 grid grid-cols-3 gap-3">
+              <div className="bg-success-bg rounded-lg p-3 text-center">
+                <p className="font-display text-xl font-bold text-success">{approvedCount}</p>
+                <p className="font-mono text-[9px] text-success uppercase tracking-wider">Approved</p>
+              </div>
+              <div className="bg-warning-bg rounded-lg p-3 text-center">
+                <p className="font-display text-xl font-bold text-warning">{pendingCount}</p>
+                <p className="font-mono text-[9px] text-warning uppercase tracking-wider">Pending Review</p>
+              </div>
+              <div className="bg-muted rounded-lg p-3 text-center">
+                <p className="font-display text-xl font-bold text-muted-foreground">{removedCount}</p>
+                <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Removed</p>
+              </div>
             </div>
 
             {/* Discipline sections */}
@@ -154,66 +144,40 @@ const CaseDetail = () => {
                   icon={disciplineIcons[d]}
                   comments={filtered}
                   onUpdateComment={updateComment}
-                  projectAddress={projectAddress}
-                  projectDescription={projectDescription}
+                  onAddManual={handleAddManual}
                 />
               );
             })}
-
-            {/* Resubmittal Requirements */}
-            {requirements.length > 0 && (
-              <div className="mt-10 mb-6">
-                <h2 className="font-display text-lg font-bold text-foreground mb-4 border-b border-border pb-2">
-                  📋 Resubmittal Requirements
-                </h2>
-                <div className="bg-card rounded-lg border border-border p-5 space-y-2">
-                  {requirements.map((req, i) => (
-                    <label key={i} className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={checkedItems[`req-${i}`] || false}
-                        onChange={e => setCheckedItems(prev => ({ ...prev, [`req-${i}`]: e.target.checked }))}
-                        className="mt-0.5 w-4 h-4 rounded border-border text-gold focus:ring-gold"
-                      />
-                      <span className={`font-body text-sm transition-colors ${checkedItems[`req-${i}`] ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                        {req}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Summary Bar */}
-        <div className="sticky bottom-0 bg-card border-t border-border px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] text-foreground">{projectAddress}</span>
-            <span className="font-mono text-[10px] text-gold">·</span>
-            <span className="font-mono text-[10px] text-foreground">{permitNumber}</span>
-            <span className="font-mono text-[10px] text-gold">·</span>
-            <span className="font-mono text-[10px] text-muted-foreground">{jurisdictionLabels[jurisdiction] || jurisdiction}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] text-success">✓ {addressedCount} addressed</span>
-            <span className="font-mono text-[10px] text-info">● {pendingCount} pending</span>
-            {naCount > 0 && <span className="font-mono text-[10px] text-muted-foreground">— {naCount} N/A</span>}
-            <button
-              onClick={() => navigate(`/case/${id}/letter`)}
-              className="ml-2 px-4 py-1.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-wider rounded hover:bg-gold-dark transition-colors"
-            >
-              → Generate Letter ({addressedCount} addressed)
-            </button>
+          {/* Bottom Bar */}
+          <div className="sticky bottom-0 bg-card border-t border-border px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] text-foreground">{projectAddress}</span>
+              <span className="font-mono text-[10px] text-gold">·</span>
+              <span className="font-mono text-[10px] text-muted-foreground">{jurisdictionLabels[jurisdiction] || jurisdiction}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[10px] text-success">✅ {approvedCount} approved</span>
+              <span className="font-mono text-[10px] text-warning">⏳ {pendingCount} pending</span>
+              <button
+                onClick={() => navigate(`/case/${id}/letter`)}
+                disabled={approvedCount === 0}
+                className="ml-2 px-4 py-1.5 bg-gold text-accent-foreground font-mono text-[10px] uppercase tracking-wider rounded hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                📄 Generate Correction Letter ({approvedCount} approved)
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <AddCommentModal
         open={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => { setShowAddModal(false); setAddForDiscipline(undefined); }}
         onAdd={addComment}
         nextNumber={nextNumber}
+        defaultDiscipline={addForDiscipline}
       />
     </AppLayout>
   );
