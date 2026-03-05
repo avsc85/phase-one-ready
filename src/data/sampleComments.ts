@@ -84,5 +84,7 @@ export const sampleCasesFull: Record<string, { comments: CityComment[]; projectA
     applicantPhone: "(650) 555-0123",
     applicantEmail: "jsmith@email.com",
     apn: "035-432-120",
+    reviewerEmail: "building@cityofsanmateo.org",
+    reviewerPhone: "(650) 522-7200",
   },
 };
