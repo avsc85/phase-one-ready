@@ -9,6 +9,8 @@ import NewCase from "./pages/NewCase";
 import CaseDetail from "./pages/CaseDetail";
 import LetterGenerator from "./pages/LetterGenerator";
 import PrintPreview from "./pages/PrintPreview";
+import Upload from "./pages/Upload";
+import Processing from "./pages/Processing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload" element={<Upload />} />
+          <Route path="/processing/:id" element={<Processing />} />
           <Route path="/new-case" element={<NewCase />} />
           <Route path="/case/:id" element={<CaseDetail />} />
           <Route path="/case/:id/letter" element={<LetterGenerator />} />
