@@ -2,95 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* CalPlanCheck AI Brand */
+    --navy: 216 78% 21%;
+    --navy-light: 214 69% 33%;
+    --navy-dark: 216 80% 13%;
+    --gold: 44 55% 54%;
+    --gold-light: 44 57% 77%;
+    --gold-dark: 42 56% 40%;
+    --cream: 40 53% 95%;
+    --warm-white: 50 100% 99%;
+
+    /* Semantic tokens mapped to brand */
+    --background: 50 100% 99%;
+    --foreground: 240 28% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 28% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 28% 14%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 216 78% 21%;
+    --primary-foreground: 44 57% 77%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 53% 95%;
+    --secondary-foreground: 240 28% 14%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 18% 90%;
+    --muted-foreground: 240 7% 57%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 44 55% 54%;
+    --accent-foreground: 216 80% 13%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 27%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 41 18% 80%;
+    --input: 41 18% 80%;
+    --ring: 44 55% 54%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Status colors */
+    --success: 155 61% 26%;
+    --success-bg: 145 45% 93%;
+    --warning: 45 100% 24%;
+    --warning-bg: 44 88% 95%;
+    --danger: 0 100% 27%;
+    --danger-bg: 0 67% 95%;
+    --info: 214 69% 33%;
+    --info-bg: 218 57% 94%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Text */
+    --text-primary: 240 28% 14%;
+    --text-secondary: 240 18% 35%;
+    --text-muted: 240 7% 57%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 216 78% 21%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 44 55% 54%;
+    --sidebar-primary-foreground: 216 80% 13%;
+    --sidebar-accent: 214 69% 33%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214 69% 33%;
+    --sidebar-ring: 44 55% 54%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 216 80% 13%;
+    --foreground: 40 53% 95%;
+    --card: 216 78% 21%;
+    --card-foreground: 40 53% 95%;
+    --popover: 216 78% 21%;
+    --popover-foreground: 40 53% 95%;
+    --primary: 44 55% 54%;
+    --primary-foreground: 216 80% 13%;
+    --secondary: 214 69% 33%;
+    --secondary-foreground: 40 53% 95%;
+    --muted: 216 78% 21%;
+    --muted-foreground: 240 7% 57%;
+    --accent: 44 55% 54%;
+    --accent-foreground: 216 80% 13%;
+    --destructive: 0 100% 27%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 69% 33%;
+    --input: 214 69% 33%;
+    --ring: 44 55% 54%;
+    --sidebar-background: 216 80% 13%;
+    --sidebar-foreground: 40 53% 95%;
+    --sidebar-primary: 44 55% 54%;
+    --sidebar-primary-foreground: 216 80% 13%;
+    --sidebar-accent: 216 78% 21%;
+    --sidebar-accent-foreground: 40 53% 95%;
+    --sidebar-border: 216 78% 21%;
+    --sidebar-ring: 44 55% 54%;
   }
 }
 
@@ -100,6 +107,10 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
   }
 }
