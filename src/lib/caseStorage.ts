@@ -64,5 +64,13 @@ export const resubmittalRequirements: Record<string, string[]> = {
     "Changes not in response to comments: separate narrative letter with sheet references",
     "Responses of 'see plans' not acceptable — must be specific",
     "Full resubmittal package via eplan.ci.milpitas.ca.gov",
+    "B-Recycling Report required",
+    "B-Special Inspection if applicable",
+  ],
+  fremont: [
+    "Responses to Comments document uploaded as 'New' in Citizen Access",
+    "Complete revised plan set",
+    "GH tracking number obtained",
+    "Contact record Team Lead with questions",
   ],
 };

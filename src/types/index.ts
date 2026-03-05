@@ -25,7 +25,7 @@ export type Discipline =
   | "Public Works"
   | "Construction & Demolition";
 
-export type CommentStatus = "pending" | "addressed" | "deferred" | "n/a";
+export type CommentStatus = "pending" | "in_progress" | "addressed" | "deferred" | "n/a";
 
 export interface PlanCheckCase {
   id: string;

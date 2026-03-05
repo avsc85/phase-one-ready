@@ -2,13 +2,13 @@ import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/upload", label: "Upload Plans" },
   { to: "/new-case", label: "New Case" },
-  { to: "/dashboard", label: "Active Reviews" },
 ];
 
 const DemoBanner = () => (
   <div className="h-7 bg-accent flex items-center justify-center font-mono text-[10px] tracking-widest text-accent-foreground">
-    🚧 DEMO MODE — For Presentation Purposes Only — Not for Official Submission
+    🚧 DEMO MODE — CalPlanCheck AI — For Presentation Purposes Only
   </div>
 );
 
