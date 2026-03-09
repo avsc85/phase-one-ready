@@ -13,7 +13,12 @@ export interface CityComment {
   reviewStatus: ReviewStatus;
   editedText: string;
   aiConfidence: "high" | "medium" | "low";
+  missingInfo: string;
+  suggestedRectification: string;
+  inspectorStatus: InspectorStatus;
 }
+
+export type InspectorStatus = "non_compliance" | "need_additional_info" | "needs_manual_review" | "";
 
 export type ReviewStatus = "pending" | "approved" | "edited" | "removed";
 

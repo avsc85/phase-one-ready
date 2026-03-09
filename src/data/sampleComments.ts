@@ -3,11 +3,17 @@ import { CityComment } from "@/types";
 const makeComment = (
   id: string, number: string, discipline: CityComment["discipline"],
   sheetReference: string, codeReference: string, commentText: string,
-  confidence: CityComment["aiConfidence"] = "high"
+  confidence: CityComment["aiConfidence"] = "high",
+  missingInfo: string = "",
+  suggestedRectification: string = "",
+  inspectorStatus: CityComment["inspectorStatus"] = "non_compliance"
 ): CityComment => ({
   id, number, discipline, sheetReference, codeReference, commentText,
   status: "pending", userResponse: "", aiResponse: "", priority: "required",
   source: "ai", reviewStatus: "pending", editedText: "", aiConfidence: confidence,
+  missingInfo: missingInfo || "See comment for details",
+  suggestedRectification: suggestedRectification || "Revise plans to comply with cited code section",
+  inspectorStatus,
 });
 
 export const norfolkComments: CityComment[] = [
