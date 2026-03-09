@@ -3,14 +3,6 @@ import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { ArrowRight } from "lucide-react";
 
-const jurisdictions = [
-  { emoji: "🏛️", city: "City of San Mateo", dept: "Building Division", permit: "BD-20XX-XXXXXX" },
-  { emoji: "🏛️", city: "City of San Leandro", dept: "Community Development", permit: "BRADU-XX-XXXX" },
-  { emoji: "🏛️", city: "City of Milpitas", dept: "Building Safety & Housing", permit: "B-BPXX-XXXX" },
-  { emoji: "🏛️", city: "City of San Bruno", dept: "Community Development", permit: "BLD-20XX-XXX" },
-  { emoji: "🏛️", city: "City of Fremont", dept: "Development Review", permit: "BLD20XX-XXXXX" },
-  { emoji: "🏛️", city: "City of Union City", dept: "Planning Department", permit: "Planning Comments" },
-];
 
 const stats = [
   { value: "800+", label: "Code Rules Checked Per Submittal" },
@@ -159,37 +151,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                 )}
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Jurisdictions */}
-      <section className="bg-cream py-20">
-        <div className="container">
-          <h2 className="font-display text-3xl font-bold text-foreground text-center mb-3">
-            Pre-Configured for Bay Area Jurisdictions
-          </h2>
-          <p className="font-body text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-            Each jurisdiction has its own letter format, code citations, and resubmittal requirements — all built in.
-          </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            {jurisdictions.map((j, i) => (
-              <div key={i} className="bg-card rounded-lg border border-border p-5 hover:border-gold/50 transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-lg flex-shrink-0">
-                    {j.emoji}
-                  </div>
-                  <div>
-                    <p className="font-display text-sm font-bold text-foreground">{j.city}</p>
-                    <p className="font-body text-xs text-muted-foreground">{j.dept}</p>
-                    <p className="font-mono text-[10px] text-gold-dark mt-1">{j.permit}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div className="bg-muted/50 rounded-lg border border-dashed border-border p-5 flex items-center justify-center">
-              <p className="font-mono text-xs text-muted-foreground">More cities coming soon...</p>
-            </div>
           </div>
         </div>
       </section>

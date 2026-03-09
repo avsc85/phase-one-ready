@@ -42,6 +42,9 @@ const AddCommentModal = ({ open, onClose, onAdd, nextNumber, defaultDiscipline }
       reviewStatus: "approved",
       editedText: "",
       aiConfidence: "high",
+      missingInfo: "",
+      suggestedRectification: "",
+      inspectorStatus: "",
     };
     onAdd(comment);
     setSheetRef("");
