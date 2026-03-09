@@ -3,14 +3,6 @@ import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { ArrowRight } from "lucide-react";
 
-const jurisdictions = [
-  { emoji: "🏛️", city: "City of San Mateo", dept: "Building Division", permit: "BD-20XX-XXXXXX" },
-  { emoji: "🏛️", city: "City of San Leandro", dept: "Community Development", permit: "BRADU-XX-XXXX" },
-  { emoji: "🏛️", city: "City of Milpitas", dept: "Building Safety & Housing", permit: "B-BPXX-XXXX" },
-  { emoji: "🏛️", city: "City of San Bruno", dept: "Community Development", permit: "BLD-20XX-XXX" },
-  { emoji: "🏛️", city: "City of Fremont", dept: "Development Review", permit: "BLD20XX-XXXXX" },
-  { emoji: "🏛️", city: "City of Union City", dept: "Planning Department", permit: "Planning Comments" },
-];
 
 const stats = [
   { value: "800+", label: "Code Rules Checked Per Submittal" },
