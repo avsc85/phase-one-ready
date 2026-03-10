@@ -287,6 +287,13 @@ const CaseDetail = () => {
                             )}
                           </TableCell>
                           <TableCell className="font-mono text-[11px] text-muted-foreground">{c.sheetReference || "—"}</TableCell>
+                          <TableCell>
+                            {c.codeReference ? (
+                              <span className="font-mono text-[10px] text-gold bg-navy px-1.5 py-0.5 rounded">{c.codeReference}</span>
+                            ) : (
+                              <span className="text-muted-foreground text-[10px]">—</span>
+                            )}
+                          </TableCell>
                           <TableCell>{statusBadge(c.inspectorStatus || "non_compliance")}</TableCell>
                           <TableCell>
                             {isApproved && <Badge className="bg-success/15 text-success border-success/30 text-[9px]">Approved</Badge>}
