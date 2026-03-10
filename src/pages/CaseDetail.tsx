@@ -249,6 +249,7 @@ const CaseDetail = () => {
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[40px]"></TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Category</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Sheet Name</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Code Identifier</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Status</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Review</TableHead>
                   </TableRow>
