@@ -5,11 +5,12 @@ import CaseSidebar from "@/components/CaseSidebar";
 import AddCommentModal from "@/components/AddCommentModal";
 import { loadComments, saveComments, getCaseInfo, ALL_DISCIPLINES, disciplineIcons } from "@/lib/caseStorage";
 import { CityComment, Discipline, InspectorStatus } from "@/types";
-import { Check, Pencil, Trash2, RotateCcw, Save, X, Plus } from "lucide-react";
+import { Check, Pencil, Trash2, RotateCcw, Save, X, Plus, ChevronRight } from "lucide-react";
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -37,6 +38,7 @@ const CaseDetail = () => {
   const [editSuggested, setEditSuggested] = useState("");
   const [editStatus, setEditStatus] = useState<InspectorStatus>("");
   const [filterDiscipline, setFilterDiscipline] = useState<string>("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const caseInfo = id ? getCaseInfo(id) : null;
 
@@ -74,6 +76,7 @@ const CaseDetail = () => {
     setEditMissing(c.missingInfo || "");
     setEditSuggested(c.suggestedRectification || "");
     setEditStatus(c.inspectorStatus || "");
+    setExpandedId(c.id);
   };
 
   const saveEdit = (c: CityComment) => {
@@ -100,6 +103,10 @@ const CaseDetail = () => {
 
   const handleRestore = (c: CityComment) => {
     updateComment({ ...c, reviewStatus: "pending", status: "pending", editedText: "" });
+  };
+
+  const toggleExpand = (cId: string) => {
+    setExpandedId(prev => prev === cId ? null : cId);
   };
 
   const approvedCount = comments.filter(c => c.reviewStatus === "approved" || c.reviewStatus === "edited").length;
@@ -157,7 +164,7 @@ const CaseDetail = () => {
                   AI-Generated Plan Check Comments — Human Review
                 </h1>
                 <p className="font-body text-sm text-muted-foreground mt-1">
-                  Review each finding. Override Missing Info, Suggested Rectification, and Status as needed.
+                  Click a row to expand details. Override Missing Info, Suggested Rectification, and Status as needed.
                 </p>
               </div>
               <button
@@ -233,29 +240,17 @@ const CaseDetail = () => {
               })}
             </div>
 
-            {/* Comments Table */}
+            {/* Comments Table — Expandable Rows */}
             <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-navy/5">
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[40px]">#</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[120px]">Category</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[120px]">Sheet Name</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider min-w-[200px]">Rule Description</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[120px]">Code Identifier</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider min-w-[160px]">
-                      Missing Info / Gap
-                      <span className="block text-[8px] text-gold normal-case tracking-normal">(Inspector Override)</span>
-                    </TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider min-w-[160px]">
-                      Suggested Rectification
-                      <span className="block text-[8px] text-gold normal-case tracking-normal">(Inspector Override)</span>
-                    </TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[160px]">
-                      Status
-                      <span className="block text-[8px] text-gold normal-case tracking-normal">(Inspector Override)</span>
-                    </TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[120px] text-center">Actions</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[40px]"></TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Category</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Sheet Name</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Review</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -263,139 +258,180 @@ const CaseDetail = () => {
                     const isEditing = editingId === c.id;
                     const isRemoved = c.reviewStatus === "removed";
                     const isApproved = c.reviewStatus === "approved" || c.reviewStatus === "edited";
+                    const isExpanded = expandedId === c.id;
 
                     return (
-                      <TableRow
-                        key={c.id}
-                        className={`text-xs transition-colors ${
-                          isRemoved ? "opacity-40 bg-muted/30" :
-                          isApproved ? "bg-success-bg/50" :
-                          "hover:bg-muted/30"
-                        }`}
-                      >
-                        {/* # */}
-                        <TableCell className="font-mono text-xs font-bold text-foreground">{c.number}</TableCell>
-
-                        {/* Category */}
-                        <TableCell>
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-foreground">
-                            {disciplineIcons[c.discipline]} {c.discipline}
-                          </span>
-                          {c.source === "manual" && (
-                            <Badge variant="outline" className="ml-1 text-[8px] px-1 py-0">Manual</Badge>
-                          )}
-                        </TableCell>
-
-                        {/* Sheet Name */}
-                        <TableCell className="font-mono text-[11px] text-muted-foreground">{c.sheetReference}</TableCell>
-
-                        {/* Rule Description */}
-                        <TableCell>
-                          <p className={`font-body text-xs leading-relaxed text-foreground ${isRemoved ? "line-through" : ""}`}>
-                            {c.editedText || c.commentText}
-                          </p>
-                        </TableCell>
-
-                        {/* Code Identifier */}
-                        <TableCell>
-                          {c.codeReference ? (
-                            <span className="font-mono text-[10px] text-gold bg-navy px-1.5 py-0.5 rounded">{c.codeReference}</span>
-                          ) : (
-                            <span className="text-muted-foreground text-[10px]">—</span>
-                          )}
-                        </TableCell>
-
-                        {/* Missing Info / Gap Analysis */}
-                        <TableCell>
-                          {isEditing ? (
-                            <textarea
-                              value={editMissing}
-                              onChange={e => setEditMissing(e.target.value)}
-                              rows={2}
-                              className="w-full px-2 py-1 bg-background border border-gold rounded text-xs font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
-                            />
-                          ) : (
-                            <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
-                              {c.missingInfo || "—"}
-                            </p>
-                          )}
-                        </TableCell>
-
-                        {/* Suggested / Rectification */}
-                        <TableCell>
-                          {isEditing ? (
-                            <textarea
-                              value={editSuggested}
-                              onChange={e => setEditSuggested(e.target.value)}
-                              rows={2}
-                              className="w-full px-2 py-1 bg-background border border-gold rounded text-xs font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
-                            />
-                          ) : (
-                            <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
-                              {c.suggestedRectification || "—"}
-                            </p>
-                          )}
-                        </TableCell>
-
-                        {/* Status */}
-                        <TableCell>
-                          {isEditing ? (
-                            <Select value={editStatus} onValueChange={(v) => setEditStatus(v as InspectorStatus)}>
-                              <SelectTrigger className="h-8 text-[10px] font-mono">
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="non_compliance">Non-Compliance</SelectItem>
-                                <SelectItem value="need_additional_info">Need Additional Info</SelectItem>
-                                <SelectItem value="needs_manual_review">Needs Manual Review</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            statusBadge(c.inspectorStatus || "non_compliance")
-                          )}
-                        </TableCell>
-
-                        {/* Actions */}
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-1">
-                            {isEditing ? (
-                              <>
-                                <button onClick={() => saveEdit(c)} className="p-1.5 rounded bg-success/10 text-success hover:bg-success/20 transition-colors" title="Save">
-                                  <Save className="w-3.5 h-3.5" />
-                                </button>
-                                <button onClick={cancelEdit} className="p-1.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors" title="Cancel">
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            ) : isRemoved ? (
-                              <button onClick={() => handleRestore(c)} className="p-1.5 rounded bg-info/10 text-info hover:bg-info/20 transition-colors" title="Restore">
-                                <RotateCcw className="w-3.5 h-3.5" />
-                              </button>
-                            ) : (
-                              <>
-                                {!isApproved && (
-                                  <button onClick={() => handleApprove(c)} className="p-1.5 rounded bg-success/10 text-success hover:bg-success/20 transition-colors" title="Approve">
-                                    <Check className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                <button onClick={() => startEdit(c)} className="p-1.5 rounded bg-info/10 text-info hover:bg-info/20 transition-colors" title="Edit / Override">
-                                  <Pencil className="w-3.5 h-3.5" />
-                                </button>
-                                {!isApproved && (
-                                  <button onClick={() => handleRemove(c)} className="p-1.5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors" title="Remove">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                {isApproved && (
-                                  <button onClick={() => handleRestore(c)} className="p-1.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors" title="Undo">
-                                    <RotateCcw className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                              </>
+                      <>
+                        {/* Summary Row */}
+                        <TableRow
+                          key={c.id}
+                          onClick={() => toggleExpand(c.id)}
+                          className={`text-xs cursor-pointer transition-colors ${
+                            isRemoved ? "opacity-40 bg-muted/30" :
+                            isApproved ? "bg-success-bg/50" :
+                            isExpanded ? "bg-accent/50" :
+                            "hover:bg-muted/30"
+                          }`}
+                        >
+                          <TableCell className="font-mono text-xs font-bold text-foreground">{c.number}</TableCell>
+                          <TableCell className="px-1">
+                            <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold text-foreground">
+                              {disciplineIcons[c.discipline]} {c.discipline}
+                            </span>
+                            {c.source === "manual" && (
+                              <Badge variant="outline" className="ml-1.5 text-[8px] px-1 py-0">Manual</Badge>
                             )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                          </TableCell>
+                          <TableCell className="font-mono text-[11px] text-muted-foreground">{c.sheetReference || "—"}</TableCell>
+                          <TableCell>{statusBadge(c.inspectorStatus || "non_compliance")}</TableCell>
+                          <TableCell>
+                            {isApproved && <Badge className="bg-success/15 text-success border-success/30 text-[9px]">Approved</Badge>}
+                            {isRemoved && <Badge className="bg-muted text-muted-foreground text-[9px]">Removed</Badge>}
+                            {!isApproved && !isRemoved && <Badge className="bg-warning/15 text-warning border-warning/30 text-[9px]">Pending</Badge>}
+                          </TableCell>
+                        </TableRow>
+
+                        {/* Expanded Detail Row */}
+                        {isExpanded && (
+                          <TableRow key={`${c.id}-detail`} className="bg-accent/30 hover:bg-accent/30">
+                            <TableCell colSpan={6} className="p-0">
+                              <div className="px-6 py-4 border-t border-border/50">
+                                <Tabs defaultValue="details" className="w-full">
+                                  <TabsList className="h-8 mb-3">
+                                    <TabsTrigger value="details" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Rule Details</TabsTrigger>
+                                    <TabsTrigger value="gap" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Missing Info / Gap</TabsTrigger>
+                                    <TabsTrigger value="rectification" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Suggested Rectification</TabsTrigger>
+                                    <TabsTrigger value="actions" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Actions</TabsTrigger>
+                                  </TabsList>
+
+                                  {/* Rule Details Tab */}
+                                  <TabsContent value="details" className="mt-0">
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Rule Description</p>
+                                        <p className={`font-body text-sm leading-relaxed text-foreground ${isRemoved ? "line-through" : ""}`}>
+                                          {c.editedText || c.commentText}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Code Identifier</p>
+                                        {c.codeReference ? (
+                                          <span className="inline-block font-mono text-xs text-gold bg-navy px-2 py-1 rounded">{c.codeReference}</span>
+                                        ) : (
+                                          <span className="text-muted-foreground text-xs">—</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </TabsContent>
+
+                                  {/* Missing Info / Gap Tab */}
+                                  <TabsContent value="gap" className="mt-0">
+                                    <div>
+                                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                        Missing Information / Gap Analysis
+                                        <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                      </p>
+                                      {isEditing ? (
+                                        <textarea
+                                          value={editMissing}
+                                          onChange={e => setEditMissing(e.target.value)}
+                                          rows={3}
+                                          className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
+                                        />
+                                      ) : (
+                                        <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
+                                          {c.missingInfo || "No missing information identified."}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </TabsContent>
+
+                                  {/* Suggested Rectification Tab */}
+                                  <TabsContent value="rectification" className="mt-0">
+                                    <div>
+                                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                        Suggested / Rectification
+                                        <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                      </p>
+                                      {isEditing ? (
+                                        <textarea
+                                          value={editSuggested}
+                                          onChange={e => setEditSuggested(e.target.value)}
+                                          rows={3}
+                                          className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
+                                        />
+                                      ) : (
+                                        <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
+                                          {c.suggestedRectification || "No rectification suggested."}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </TabsContent>
+
+                                  {/* Actions Tab */}
+                                  <TabsContent value="actions" className="mt-0">
+                                    <div className="flex items-center gap-3">
+                                      {isEditing ? (
+                                        <>
+                                          <div className="flex-1">
+                                            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                              Status <span className="text-gold normal-case">(Inspector Override)</span>
+                                            </p>
+                                            <Select value={editStatus} onValueChange={(v) => setEditStatus(v as InspectorStatus)}>
+                                              <SelectTrigger className="h-9 text-xs font-mono w-64">
+                                                <SelectValue placeholder="Select status" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="non_compliance">Non-Compliance</SelectItem>
+                                                <SelectItem value="need_additional_info">Need Additional Info</SelectItem>
+                                                <SelectItem value="needs_manual_review">Needs Manual Review</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                          <button onClick={() => saveEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                            <Save className="w-3.5 h-3.5" /> Save
+                                          </button>
+                                          <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                            <X className="w-3.5 h-3.5" /> Cancel
+                                          </button>
+                                        </>
+                                      ) : isRemoved ? (
+                                        <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                          <RotateCcw className="w-3.5 h-3.5" /> Restore
+                                        </button>
+                                      ) : (
+                                        <>
+                                          <button onClick={() => startEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                            <Pencil className="w-3.5 h-3.5" /> Edit / Override
+                                          </button>
+                                          {!isApproved && (
+                                            <button onClick={() => handleApprove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                              <Check className="w-3.5 h-3.5" /> Approve
+                                            </button>
+                                          )}
+                                          {!isApproved && (
+                                            <button onClick={() => handleRemove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                              <Trash2 className="w-3.5 h-3.5" /> Remove
+                                            </button>
+                                          )}
+                                          {isApproved && (
+                                            <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                              <RotateCcw className="w-3.5 h-3.5" /> Undo Approval
+                                            </button>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  </TabsContent>
+                                </Tabs>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
                     );
                   })}
                 </TableBody>
