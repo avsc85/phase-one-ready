@@ -305,7 +305,7 @@ const CaseDetail = () => {
                         {/* Expanded Detail Row */}
                         {isExpanded && (
                           <TableRow key={`${c.id}-detail`} className="bg-accent/30 hover:bg-accent/30">
-                            <TableCell colSpan={6} className="p-0">
+                            <TableCell colSpan={7} className="p-0">
                               <div className="px-6 py-4 border-t border-border/50">
                                 <Tabs defaultValue="details" className="w-full">
                                   <TabsList className="h-8 mb-3">
