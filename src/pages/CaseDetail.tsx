@@ -249,6 +249,7 @@ const CaseDetail = () => {
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider w-[40px]"></TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Category</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Sheet Name</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-wider">Code Identifier</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Status</TableHead>
                     <TableHead className="font-mono text-[10px] uppercase tracking-wider">Review</TableHead>
                   </TableRow>
@@ -286,6 +287,13 @@ const CaseDetail = () => {
                             )}
                           </TableCell>
                           <TableCell className="font-mono text-[11px] text-muted-foreground">{c.sheetReference || "—"}</TableCell>
+                          <TableCell>
+                            {c.codeReference ? (
+                              <span className="font-mono text-[10px] text-gold bg-navy px-1.5 py-0.5 rounded">{c.codeReference}</span>
+                            ) : (
+                              <span className="text-muted-foreground text-[10px]">—</span>
+                            )}
+                          </TableCell>
                           <TableCell>{statusBadge(c.inspectorStatus || "non_compliance")}</TableCell>
                           <TableCell>
                             {isApproved && <Badge className="bg-success/15 text-success border-success/30 text-[9px]">Approved</Badge>}
@@ -297,7 +305,7 @@ const CaseDetail = () => {
                         {/* Expanded Detail Row */}
                         {isExpanded && (
                           <TableRow key={`${c.id}-detail`} className="bg-accent/30 hover:bg-accent/30">
-                            <TableCell colSpan={6} className="p-0">
+                            <TableCell colSpan={7} className="p-0">
                               <div className="px-6 py-4 border-t border-border/50">
                                 <Tabs defaultValue="details" className="w-full">
                                   <TabsList className="h-8 mb-3">
