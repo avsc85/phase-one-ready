@@ -306,135 +306,111 @@ const CaseDetail = () => {
                         {isExpanded && (
                           <TableRow key={`${c.id}-detail`} className="bg-accent/30 hover:bg-accent/30">
                             <TableCell colSpan={7} className="p-0">
-                              <div className="px-6 py-4 border-t border-border/50">
-                                <Tabs defaultValue="details" className="w-full">
-                                  <TabsList className="h-8 mb-3">
-                                    <TabsTrigger value="details" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Rule Details</TabsTrigger>
-                                    <TabsTrigger value="gap" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Missing Info / Gap</TabsTrigger>
-                                    <TabsTrigger value="rectification" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Suggested Rectification</TabsTrigger>
-                                    <TabsTrigger value="actions" className="text-[10px] font-mono uppercase tracking-wider px-3 py-1">Actions</TabsTrigger>
-                                  </TabsList>
+                              <div className="px-6 py-4 border-t border-border/50 space-y-4">
+                                {/* Rule Description */}
+                                <div>
+                                  <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Rule Description</p>
+                                  <p className={`font-body text-sm leading-relaxed text-foreground ${isRemoved ? "line-through" : ""}`}>
+                                    {c.editedText || c.commentText}
+                                  </p>
+                                </div>
 
-                                  {/* Rule Details Tab */}
-                                  <TabsContent value="details" className="mt-0">
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Rule Description</p>
-                                        <p className={`font-body text-sm leading-relaxed text-foreground ${isRemoved ? "line-through" : ""}`}>
-                                          {c.editedText || c.commentText}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Code Identifier</p>
-                                        {c.codeReference ? (
-                                          <span className="inline-block font-mono text-xs text-gold bg-navy px-2 py-1 rounded">{c.codeReference}</span>
-                                        ) : (
-                                          <span className="text-muted-foreground text-xs">—</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </TabsContent>
-
-                                  {/* Missing Info / Gap Tab */}
-                                  <TabsContent value="gap" className="mt-0">
-                                    <div>
-                                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
-                                        Missing Information / Gap Analysis
-                                        <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                {/* Detail Grid */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  {/* Missing Info / Gap */}
+                                  <div>
+                                    <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                      Missing Info / Gap Analysis
+                                      <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                    </p>
+                                    {isEditing ? (
+                                      <textarea
+                                        value={editMissing}
+                                        onChange={e => setEditMissing(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
+                                      />
+                                    ) : (
+                                      <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
+                                        {c.missingInfo || "No missing information identified."}
                                       </p>
-                                      {isEditing ? (
-                                        <textarea
-                                          value={editMissing}
-                                          onChange={e => setEditMissing(e.target.value)}
-                                          rows={3}
-                                          className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
-                                        />
-                                      ) : (
-                                        <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
-                                          {c.missingInfo || "No missing information identified."}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </TabsContent>
+                                    )}
+                                  </div>
 
-                                  {/* Suggested Rectification Tab */}
-                                  <TabsContent value="rectification" className="mt-0">
-                                    <div>
-                                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
-                                        Suggested / Rectification
-                                        <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                  {/* Suggested Rectification */}
+                                  <div>
+                                    <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                      Suggested Rectification
+                                      <span className="ml-1 text-gold normal-case">(Inspector Override)</span>
+                                    </p>
+                                    {isEditing ? (
+                                      <textarea
+                                        value={editSuggested}
+                                        onChange={e => setEditSuggested(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
+                                      />
+                                    ) : (
+                                      <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
+                                        {c.suggestedRectification || "No rectification suggested."}
                                       </p>
-                                      {isEditing ? (
-                                        <textarea
-                                          value={editSuggested}
-                                          onChange={e => setEditSuggested(e.target.value)}
-                                          rows={3}
-                                          className="w-full px-3 py-2 bg-background border border-gold rounded text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/50 resize-y"
-                                        />
-                                      ) : (
-                                        <p className="font-body text-sm text-foreground leading-relaxed bg-background rounded p-3 border border-border">
-                                          {c.suggestedRectification || "No rectification suggested."}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </TabsContent>
+                                    )}
+                                  </div>
+                                </div>
 
-                                  {/* Actions Tab */}
-                                  <TabsContent value="actions" className="mt-0">
-                                    <div className="flex items-center gap-3">
-                                      {isEditing ? (
-                                        <>
-                                          <div className="flex-1">
-                                            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
-                                              Status <span className="text-gold normal-case">(Inspector Override)</span>
-                                            </p>
-                                            <Select value={editStatus} onValueChange={(v) => setEditStatus(v as InspectorStatus)}>
-                                              <SelectTrigger className="h-9 text-xs font-mono w-64">
-                                                <SelectValue placeholder="Select status" />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                <SelectItem value="non_compliance">Non-Compliance</SelectItem>
-                                                <SelectItem value="need_additional_info">Need Additional Info</SelectItem>
-                                                <SelectItem value="needs_manual_review">Needs Manual Review</SelectItem>
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
-                                          <button onClick={() => saveEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                            <Save className="w-3.5 h-3.5" /> Save
-                                          </button>
-                                          <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                            <X className="w-3.5 h-3.5" /> Cancel
-                                          </button>
-                                        </>
-                                      ) : isRemoved ? (
-                                        <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                          <RotateCcw className="w-3.5 h-3.5" /> Restore
+                                {/* Actions Row */}
+                                <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+                                  {isEditing ? (
+                                    <>
+                                      <div className="flex-1">
+                                        <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+                                          Status <span className="text-gold normal-case">(Inspector Override)</span>
+                                        </p>
+                                        <Select value={editStatus} onValueChange={(v) => setEditStatus(v as InspectorStatus)}>
+                                          <SelectTrigger className="h-9 text-xs font-mono w-64">
+                                            <SelectValue placeholder="Select status" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="non_compliance">Non-Compliance</SelectItem>
+                                            <SelectItem value="need_additional_info">Need Additional Info</SelectItem>
+                                            <SelectItem value="needs_manual_review">Needs Manual Review</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <button onClick={() => saveEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                        <Save className="w-3.5 h-3.5" /> Save
+                                      </button>
+                                      <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                        <X className="w-3.5 h-3.5" /> Cancel
+                                      </button>
+                                    </>
+                                  ) : isRemoved ? (
+                                    <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                      <RotateCcw className="w-3.5 h-3.5" /> Restore
+                                    </button>
+                                  ) : (
+                                    <>
+                                      <button onClick={() => startEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                        <Pencil className="w-3.5 h-3.5" /> Edit / Override
+                                      </button>
+                                      {!isApproved && (
+                                        <button onClick={() => handleApprove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                          <Check className="w-3.5 h-3.5" /> Approve
                                         </button>
-                                      ) : (
-                                        <>
-                                          <button onClick={() => startEdit(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-info/10 text-info hover:bg-info/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                            <Pencil className="w-3.5 h-3.5" /> Edit / Override
-                                          </button>
-                                          {!isApproved && (
-                                            <button onClick={() => handleApprove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-success/10 text-success hover:bg-success/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                              <Check className="w-3.5 h-3.5" /> Approve
-                                            </button>
-                                          )}
-                                          {!isApproved && (
-                                            <button onClick={() => handleRemove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                              <Trash2 className="w-3.5 h-3.5" /> Remove
-                                            </button>
-                                          )}
-                                          {isApproved && (
-                                            <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
-                                              <RotateCcw className="w-3.5 h-3.5" /> Undo Approval
-                                            </button>
-                                          )}
-                                        </>
                                       )}
-                                    </div>
-                                  </TabsContent>
-                                </Tabs>
+                                      {!isApproved && (
+                                        <button onClick={() => handleRemove(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                          <Trash2 className="w-3.5 h-3.5" /> Remove
+                                        </button>
+                                      )}
+                                      {isApproved && (
+                                        <button onClick={() => handleRestore(c)} className="flex items-center gap-1.5 px-4 py-2 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors font-mono text-[10px] uppercase tracking-wider">
+                                          <RotateCcw className="w-3.5 h-3.5" /> Undo Approval
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </TableCell>
                           </TableRow>
